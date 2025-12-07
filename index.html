@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="browser-startpage" content="true">
-    <title>每日任务 | 浏览器起始页</title>
+    <title>每日任务 | 浏览器起始页（小清新版）</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
             font-family: 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
         }
 
-        /* 基础背景容器：支持自定义背景切换，添加平滑过渡 */
+        /* 1. 动态背景容器 */
         body {
             min-height: 100vh;
             padding: 20px 10px;
@@ -21,30 +21,43 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(120deg, #f0f9ff, #e6f7f5, #f5faff);
+            background-size: 400% 400%;
+            animation: gradientAnim 15s ease infinite;
+            transition: background-image 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background-attachment: fixed;
         }
 
-        /* 背景遮罩：可调节透明度，保证内容可读性 */
+        @keyframes gradientAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 背景遮罩 */
         .bg-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: rgba(255, 255, 255, 0.9);
             z-index: -1;
             transition: background-color 0.5s ease;
         }
 
-        /* 容器：增加顶部间距，优化居中视觉 */
+        /* 2. 容器样式 */
         .container {
             width: 100%;
             max-width: 850px;
             margin: 30px 0 50px;
             position: relative;
+            gap: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 顶部设置按钮：悬浮固定，不占用主空间 */
+        /* 3. 顶部设置按钮 */
         .settings-btn {
             position: fixed;
             top: 20px;
@@ -52,26 +65,26 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #4a5568;
+            color: #4ECDC4;
             font-size: 18px;
             transition: all 0.3s ease;
             z-index: 100;
         }
 
         .settings-btn:hover {
-            background: #f7fafc;
+            background: #f0f9ff;
             transform: rotate(15deg);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
         }
 
-        /* 背景设置面板：默认隐藏，弹出时居中显示 */
+        /* 4. 背景设置面板 */
         .bg-settings-panel {
             position: fixed;
             top: 50%;
@@ -79,10 +92,10 @@
             transform: translate(-50%, -50%) scale(0.9);
             width: 90%;
             max-width: 600px;
-            background: white;
+            background: #fff;
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(78, 205, 196, 0.15);
             z-index: 200;
             opacity: 0;
             pointer-events: none;
@@ -101,12 +114,12 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f9ff;
         }
 
         .panel-header h3 {
             font-size: 18px;
-            color: #2d3748;
+            color: #556270;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -116,16 +129,16 @@
             background: transparent;
             border: none;
             font-size: 20px;
-            color: #718096;
+            color: #9EB2C0;
             cursor: pointer;
             transition: color 0.2s ease;
         }
 
         .close-panel:hover {
-            color: #e53e3e;
+            color: #FF6B6B;
         }
 
-        /* 背景设置内容区：分区块布局 */
+        /* 5. 背景设置内容区 */
         .settings-section {
             margin-bottom: 22px;
         }
@@ -134,11 +147,11 @@
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
-            color: #4a5568;
+            color: #556270;
             font-weight: 500;
         }
 
-        /* 预设背景选择：网格布局，带预览效果 */
+        /* 预设背景选择 */
         .preset-bg-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -149,22 +162,23 @@
         .preset-bg-item {
             width: 100%;
             height: 70px;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
             border: 2px solid transparent;
             transition: all 0.3s ease;
             position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .preset-bg-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.15);
         }
 
         .preset-bg-item.selected {
-            border-color: #2b6cb0;
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
         }
 
         .preset-bg-item img {
@@ -173,27 +187,29 @@
             object-fit: cover;
         }
 
-        /* 本地图片上传：自定义按钮样式 */
+        /* 本地图片上传 */
         .local-bg-upload {
             position: relative;
             margin-top: 10px;
         }
 
         .upload-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 10px 20px;
-            background: #f7fafc;
-            border: 1px dashed #e2e8f0;
+            background: #f0f9ff;
+            border: 1px dashed #4ECDC4;
             border-radius: 8px;
-            color: #4a5568;
+            color: #556270;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .upload-btn:hover {
-            background: #edf2f7;
-            border-color: #cbd5e0;
+            background: #e6f7f5;
+            border-color: #3DBBB4;
         }
 
         #localBgInput {
@@ -206,14 +222,14 @@
             cursor: pointer;
         }
 
-        /* 透明度调节滑块：美化样式 */
+        /* 透明度滑块 */
         .opacity-slider {
             width: 100%;
             margin-top: 10px;
             -webkit-appearance: none;
             height: 6px;
             border-radius: 3px;
-            background: #edf2f7;
+            background: #e6f7f5;
             outline: none;
         }
 
@@ -223,19 +239,20 @@
             width: 18px;
             height: 18px;
             border-radius: 50%;
-            background: #2b6cb0;
+            background: #4ECDC4;
             cursor: pointer;
             transition: background 0.2s ease;
+            box-shadow: 0 2px 6px rgba(78, 205, 196, 0.3);
         }
 
         .opacity-slider::-webkit-slider-thumb:hover {
-            background: #2c5282;
+            background: #3DBBB4;
         }
 
         .opacity-value {
             margin-top: 8px;
             font-size: 13px;
-            color: #718096;
+            color: #9EB2C0;
             text-align: right;
         }
 
@@ -243,7 +260,7 @@
         .save-settings {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(90deg, #2b6cb0, #2c5282);
+            background: linear-gradient(90deg, #4ECDC4, #3DBBB4);
             color: white;
             border: none;
             border-radius: 8px;
@@ -252,68 +269,73 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
+            box-shadow: 0 2px 6px rgba(78, 205, 196, 0.2);
         }
 
         .save-settings:hover {
-            background: linear-gradient(90deg, #2c5282, #2a4365);
+            background: linear-gradient(90deg, #3DBBB4, #2DA8A0);
             transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.3);
         }
 
-        /* 面板优化：增加卡片立体感，优化阴影 */
+        /* 6. 面板通用样式 */
         .panel {
             background: white;
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 20px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 12px rgba(78, 205, 196, 0.08);
             transition: all 0.3s ease;
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid #f0f9ff;
         }
 
         .panel:hover {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.12);
             transform: translateY(-2px);
         }
 
-        /* 标题优化：增加图标色彩，提升视觉焦点 */
+        /* 标题样式 */
         .panel-title {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 20px;
-            color: #2d3748;
+            color: #556270;
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid #f7fafc;
+            border-bottom: 1px solid #f0f9ff;
             padding-bottom: 12px;
         }
 
-        .panel-title i {
-            color: #2b6cb0;
-            font-size: 22px;
+        /* 7. 搜索栏 + 任务分类筛选 */
+        .task-search-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
-        /* 搜索栏样式：优化图标位置，增加呼吸动画 */
         .task-search {
-            margin-bottom: 20px;
             position: relative;
         }
 
         .search-input {
             width: 100%;
             padding: 12px 16px 12px 44px;
-            border: 1px solid #f0f0f0;
+            border: 1px solid #f0f9ff;
             border-radius: 12px;
             font-size: 15px;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            background: #fafdff;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: #2b6cb0;
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+            background: #fff;
         }
 
         .search-icon {
@@ -321,16 +343,53 @@
             left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #718096;
+            color: #9EB2C0;
             font-size: 18px;
             transition: color 0.2s ease;
         }
 
         .search-input:focus + .search-icon {
-            color: #2b6cb0;
+            color: #4ECDC4;
         }
 
-        /* 用户状态面板：优化色彩，增加数值视觉层次 */
+        /* 任务分类筛选 */
+        .task-filter {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            border: 1px solid #e6f7f5;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: #556270;
+            font-weight: 500;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-option {
+            font-size: 14px;
+            color: #556270;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-option input[type="radio"] {
+            accent-color: #4ECDC4;
+            cursor: pointer;
+        }
+
+        /* 8. 用户状态面板 */
         .status-panel {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -340,20 +399,21 @@
         .status-item {
             text-align: center;
             padding: 16px 10px;
-            background-color: #f7fafc;
+            background-color: #f0f9ff;
             border-radius: 12px;
-            border: 1px solid #f0f0f0;
+            border: 1px solid #e6f7f5;
             transition: all 0.3s ease;
         }
 
         .status-item:hover {
-            background-color: #edf2f7;
+            background-color: #e6f7f5;
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(78, 205, 196, 0.1);
         }
 
         .status-label {
             font-size: 14px;
-            color: #718096;
+            color: #9EB2C0;
             margin-bottom: 8px;
             text-transform: capitalize;
         }
@@ -361,19 +421,19 @@
         .status-value {
             font-size: 24px;
             font-weight: bold;
-            color: #2b6cb0;
+            color: #4ECDC4;
             transition: color 0.2s ease;
         }
 
         .status-item:hover .status-value {
-            color: #2c5282;
+            color: #3DBBB4;
         }
 
-        /* 经验条：优化渐变，增加动态感 */
+        /* 经验条 */
         .exp-bar-container {
             width: 100%;
             height: 12px;
-            background-color: #edf2f7;
+            background-color: #e6f7f5;
             border-radius: 6px;
             margin-top: 10px;
             overflow: hidden;
@@ -382,7 +442,7 @@
 
         .exp-bar {
             height: 100%;
-            background: linear-gradient(90deg, #48bb78, #38a169, #2f855a);
+            background: linear-gradient(90deg, #68D391, #48BB78, #38A169);
             width: 0%;
             transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             background-size: 200% auto;
@@ -395,28 +455,29 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 任务列表：优化间距，增加内容呼吸感 */
+        /* 9. 任务列表 */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
         .task-item {
             display: flex;
             flex-direction: column;
             padding: 18px;
-            border-bottom: 1px solid #f7fafc;
-            transition: background-color 0.3s ease;
             border-radius: 12px;
-            margin-bottom: 14px;
-            background: #fdfdfe;
-        }
-
-        .task-item:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
+            background: #fafdff;
+            border: 1px solid #f0f9ff;
+            transition: background-color 0.3s ease;
         }
 
         .task-item:hover {
-            background-color: #f7fafc;
+            background-color: #f0f9ff;
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.08);
         }
 
-        /* 任务头部：优化按钮排列，增加间距 */
+        /* 任务头部 */
         .task-header {
             display: flex;
             align-items: center;
@@ -431,31 +492,31 @@
             flex: 1;
         }
 
-        /* 复选框美化：增大尺寸，优化选中效果 */
+        /* 复选框美化 */
         .task-checkbox {
             width: 22px;
             height: 22px;
             cursor: pointer;
-            accent-color: #48bb78;
+            accent-color: #68D391;
             border-radius: 6px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e6f7f5;
             transition: all 0.2s ease;
         }
 
         .task-checkbox:checked {
-            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+            box-shadow: 0 0 0 3px rgba(104, 211, 145, 0.2);
         }
 
         .task-title {
             font-size: 17px;
-            color: #2d3748;
+            color: #556270;
             transition: all 0.3s ease;
             word-break: break-all;
         }
 
         .task-title.completed {
             text-decoration: line-through;
-            color: #a0aec0;
+            color: #9EB2C0;
             font-weight: 400;
         }
 
@@ -465,7 +526,7 @@
             gap: 10px;
         }
 
-        /* 任务元数据：优化色彩，增加图标 */
+        /* 任务元数据 */
         .task-meta {
             display: flex;
             align-items: center;
@@ -474,9 +535,20 @@
             font-size: 14px;
         }
 
+        .task-category {
+            color: #556270;
+            background-color: #e6f7f5;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: capitalize;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .task-plan {
-            color: #4a5568;
-            background-color: #edf2f7;
+            color: #556270;
+            background-color: #e6f7f5;
             padding: 4px 10px;
             border-radius: 6px;
             text-transform: capitalize;
@@ -486,9 +558,9 @@
         }
 
         .task-points {
-            color: #dd6b20;
+            color: #38A169;
             font-weight: 500;
-            background-color: #fffaf0;
+            background-color: #f0fdf4;
             padding: 4px 12px;
             border-radius: 18px;
             display: flex;
@@ -496,88 +568,281 @@
             gap: 6px;
         }
 
-        /* 任务扩展区：优化边框，增加hover效果 */
-        .task-extension {
+        /* 10. 多链接功能 */
+        .task-links {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .ext-item {
+        .links-header {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .ext-label {
+            align-items: center;
+            justify-content: space-between;
             font-size: 13px;
-            color: #718096;
+            color: #9EB2C0;
+            margin-bottom: 4px;
+        }
+
+        .links-label {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .ext-content {
-            font-size: 14px;
-            color: #2d3748;
+        .btn-add-link {
+            padding: 4px 10px;
+            font-size: 12px;
+            background: linear-gradient(90deg, #4ECDC4, #3DBBB4);
+            color: white;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-link:hover {
+            background: linear-gradient(90deg, #3DBBB4, #2DA8A0);
+        }
+
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 8px 12px;
-            background-color: #f7fafc;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .link-item:hover {
+            border-color: #e6f7f5;
+            background-color: #e6f7f5;
+        }
+
+        .link-url {
+            font-size: 14px;
+            color: #4ECDC4;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            word-break: break-all;
+            flex: 1;
+            margin-right: 12px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-edit-link, .btn-delete-link {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit-link {
+            background-color: #e6f7f5;
+            color: #4ECDC4;
+        }
+
+        .btn-edit-link:hover {
+            background-color: #d1ebe7;
+        }
+
+        .btn-delete-link {
+            background-color: #ffe6e6;
+            color: #FF6B6B;
+        }
+
+        .btn-delete-link:hover {
+            background-color: #ffd9d9;
+        }
+
+        .no-links {
+            font-size: 14px;
+            color: #9EB2C0;
+            padding: 8px 12px;
+            background-color: #f0f9ff;
+            border-radius: 8px;
+        }
+
+        /* 11. 链接编辑/添加弹窗 */
+        .link-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .link-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .link-modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 24px rgba(78, 205, 196, 0.2);
+        }
+
+        .link-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f9ff;
+        }
+
+        .link-modal-title {
+            font-size: 18px;
+            color: #556270;
+            font-weight: 500;
+        }
+
+        .link-modal-close {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: #9EB2C0;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .link-modal-close:hover {
+            color: #FF6B6B;
+        }
+
+        .link-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .link-modal-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .link-modal-form label {
+            font-size: 14px;
+            color: #556270;
+            font-weight: 500;
+        }
+
+        .link-modal-form input {
+            padding: 10px 12px;
+            border: 1px solid #e6f7f5;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .link-modal-form input:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15);
+        }
+
+        .link-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+
+        /* 12. 任务备注编辑 */
+        .task-note {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .note-label {
+            font-size: 13px;
+            color: #9EB2C0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-content {
+            font-size: 14px;
+            color: #556270;
+            padding: 8px 12px;
+            background-color: #f0f9ff;
             border-radius: 8px;
             border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
             word-break: break-all;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
         }
 
-        .ext-content:hover {
-            border-color: #e2e8f0;
-            background-color: #edf2f7;
+        .note-content:hover {
+            border-color: #e6f7f5;
+            background-color: #e6f7f5;
         }
 
-        .ext-content.link {
-            color: #2b6cb0;
-            text-decoration: underline;
-            text-underline-offset: 3px;
-        }
-
-        /* 编辑输入框：优化边框和圆角 */
-        .ext-edit-note {
+        .note-edit {
             width: 100%;
             min-height: 70px;
             padding: 10px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e6f7f5;
             border-radius: 8px;
             font-size: 14px;
             resize: vertical;
             transition: all 0.3s ease;
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+            background: #fafdff;
         }
 
-        .ext-edit-link {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
-        }
-
-        .ext-edit-note:focus, .ext-edit-link:focus {
+        .note-edit:focus {
             outline: none;
-            border-color: #2b6cb0;
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+            background: #fff;
         }
 
-        /* 编辑操作按钮组：优化间距 */
-        .ext-edit-actions {
+        .note-actions {
             display: flex;
             gap: 10px;
             margin-top: 8px;
+            justify-content: flex-end;
         }
 
-        /* 按钮统一优化：增加圆角，优化渐变 */
+        /* 13. 按钮统一样式 */
         .btn {
             padding: 7px 14px;
             border-radius: 8px;
@@ -589,54 +854,60 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .btn-complete {
-            background: linear-gradient(90deg, #48bb78, #38a169);
+            background: linear-gradient(90deg, #68D391, #48BB78);
             color: white;
         }
 
         .btn-complete:hover {
-            background: linear-gradient(90deg, #38a169, #2f855a);
+            background: linear-gradient(90deg, #48BB78, #38A169);
+            box-shadow: 0 4px 8px rgba(104, 211, 145, 0.2);
         }
 
         .btn-cancel-complete {
-            background: linear-gradient(90deg, #f6ad55, #ed8936);
+            background: linear-gradient(90deg, #FFD166, #FBBF24);
             color: white;
         }
 
         .btn-cancel-complete:hover {
-            background: linear-gradient(90deg, #ed8936, #dd6b20);
+            background: linear-gradient(90deg, #FBBF24, #F59E0B);
+            box-shadow: 0 4px 8px rgba(251, 191, 36, 0.2);
         }
 
         .btn-delete {
-            background: linear-gradient(90deg, #f56565, #e53e3e);
+            background: linear-gradient(90deg, #FF9F9F, #FF6B6B);
             color: white;
         }
 
         .btn-delete:hover {
-            background: linear-gradient(90deg, #e53e3e, #c53030);
+            background: linear-gradient(90deg, #FF6B6B, #E53E3E);
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.2);
         }
 
         .btn-save {
-            background: linear-gradient(90deg, #48bb78, #38a169);
+            background: linear-gradient(90deg, #68D391, #48BB78);
             color: white;
         }
 
         .btn-save:hover {
-            background: linear-gradient(90deg, #38a169, #2f855a);
+            background: linear-gradient(90deg, #48BB78, #38A169);
+            box-shadow: 0 4px 8px rgba(104, 211, 145, 0.2);
         }
 
         .btn-cancel {
-            background: linear-gradient(90deg, #a0aec0, #718096);
+            background: linear-gradient(90deg, #B8D8E7, #9EB2C0);
             color: white;
         }
 
         .btn-cancel:hover {
-            background: linear-gradient(90deg, #718096, #4a5568);
+            background: linear-gradient(90deg, #9EB2C0, #7A93A4);
+            box-shadow: 0 4px 8px rgba(158, 178, 192, 0.2);
         }
 
-        /* 添加任务表单：优化网格间距，提升移动端体验 */
+        /* 14. 添加任务表单 */
         .add-task-form {
             display: grid;
             grid-template-columns: 1fr 120px 120px 120px;
@@ -646,40 +917,66 @@
 
         .form-input {
             padding: 12px 16px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e6f7f5;
             border-radius: 8px;
             font-size: 15px;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            background: #fafdff;
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            border: 1px solid #e6f7f5;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            background: #fafdff;
+            color: #556270;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239EB2C0' viewBox='0 0 16 16'%3E%3Cpath d='M8 11l4-4H4l4 4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #2b6cb0;
-            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+            background: #fff;
         }
 
         .btn-add {
-            background: linear-gradient(90deg, #2b6cb0, #2c5282);
+            background: linear-gradient(90deg, #4ECDC4, #3DBBB4);
             color: white;
             padding: 12px;
         }
 
         .btn-add:hover {
-            background: linear-gradient(90deg, #2c5282, #2a4365);
+            background: linear-gradient(90deg, #3DBBB4, #2DA8A0);
             transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.3);
         }
 
-        /* 日期提示：优化背景，增加图标 */
+        /* 日期提示 */
         .date-tip {
             text-align: center;
-            color: #718096;
+            color: #9EB2C0;
             font-size: 14px;
             margin-bottom: 20px;
             padding: 12px;
-            background-color: #f7fafc;
+            background-color: #f0f9ff;
             border-radius: 12px;
-            border: 1px solid #f0f0f0;
+            border: 1px solid #e6f7f5;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -687,10 +984,10 @@
         }
 
         .date-tip i {
-            color: #2b6cb0;
+            color: #4ECDC4;
         }
 
-        /* 响应式优化：更精细的断点适配 */
+        /* 15. 响应式优化 */
         @media (max-width: 768px) {
             .add-task-form {
                 grid-template-columns: 1fr;
@@ -725,6 +1022,11 @@
                 padding: 20px 16px;
                 border-radius: 12px;
             }
+
+            .task-filter {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
 
         @media (max-width: 480px) {
@@ -750,13 +1052,16 @@
             .preset-bg-list {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .link-modal-content {
+                padding: 16px;
+            }
         }
     </style>
-    <!-- 引入图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- 背景遮罩层（用于调节透明度） -->
+    <!-- 背景遮罩层 -->
     <div class="bg-overlay"></div>
 
     <!-- 顶部设置按钮 -->
@@ -775,667 +1080,898 @@
         <div class="settings-section">
             <label>1. 选择预设背景</label>
             <div class="preset-bg-list" id="presetBgList">
-                <div class="preset-bg-item selected" data-bg="https://picsum.photos/id/1068/1920/1080">
-                    <img src="https://picsum.photos/id/1068/300/200" alt="预设背景1">
+                <div class="preset-bg-item selected" data-bg="https://picsum.photos/id/152/1920/1080">
+                    <img src="https://picsum.photos/id/152/300/200" alt="薄荷绿植物">
                 </div>
-                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1035/1920/1080">
-                    <img src="https://picsum.photos/id/1035/300/200" alt="预设背景2">
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/177/1920/1080">
+                    <img src="https://picsum.photos/id/177/300/200" alt="浅蓝天空">
                 </div>
-                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1043/1920/1080">
-                    <img src="https://picsum.photos/id/1043/300/200" alt="预设背景3">
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/225/1920/1080">
+                    <img src="https://picsum.photos/id/225/300/200" alt="清新草地">
                 </div>
-                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1059/1920/1080">
-                    <img src="https://picsum.photos/id/1059/300/200" alt="预设背景4">
-                </div>
-                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1062/1920/1080">
-                    <img src="https://picsum.photos/id/1062/300/200" alt="预设背景5">
-                </div>
-                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1080/1920/1080">
-                    <img src="https://picsum.photos/id/1080/300/200" alt="预设背景6">
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/119/1920/1080">
+                    <img src="https://picsum.photos/id/119/300/200" alt="淡雅花卉">
                 </div>
             </div>
         </div>
 
         <!-- 本地图片上传 -->
         <div class="settings-section">
-            <label>2. 上传本地背景（优先级高于预设）</label>
+            <label>2. 上传本地背景图（支持永久保存）</label>
             <div class="local-bg-upload">
-                <label class="upload-btn">
-                    <i class="fas fa-upload"></i> 选择本地图片
-                    <input type="file" id="localBgInput" accept="image/*">
-                </label>
-                <!-- 本地图片预览（默认隐藏） -->
-                <div id="localBgPreview" style="margin-top:12px; display:none;">
-                    <img src="" alt="本地图片预览" style="max-width:100%; border-radius:8px; max-height:200px;">
-                </div>
+                <button class="upload-btn">
+                    <i class="fas fa-upload"></i> 选择本地图片（建议<5MB）
+                </button>
+                <input type="file" id="localBgInput" accept="image/*">
             </div>
         </div>
 
-        <!-- 背景透明度调节 -->
+        <!-- 背景透明度设置 -->
         <div class="settings-section">
-            <label>3. 背景透明度（数值越小越透明）</label>
-            <input type="range" class="opacity-slider" id="bgOpacitySlider" min="50" max="100" value="85">
-            <div class="opacity-value" id="opacityValue">当前透明度：85%</div>
+            <label>3. 背景透明度</label>
+            <input type="range" class="opacity-slider" id="bgOpacitySlider" min="50" max="100" value="90">
+            <div class="opacity-value" id="opacityValue">当前透明度：90%</div>
         </div>
 
         <!-- 保存设置按钮 -->
-        <button class="save-settings" id="saveSettingsBtn">保存设置</button>
+        <button class="save-settings" id="saveBgSettings">保存设置</button>
     </div>
 
+    <!-- 链接编辑/添加弹窗 -->
+    <div class="link-modal" id="linkModal">
+        <div class="link-modal-content">
+            <div class="link-modal-header">
+                <h3 class="link-modal-title" id="linkModalTitle">添加链接</h3>
+                <button class="link-modal-close" id="closeLinkModal">&times;</button>
+            </div>
+            <form class="link-modal-form" id="linkModalForm">
+                <input type="hidden" id="linkTaskId">
+                <input type="hidden" id="linkIndex">
+                <div class="form-group">
+                    <label for="linkName">链接名称</label>
+                    <input type="text" id="linkName" placeholder="例如：任务参考文档" required>
+                </div>
+                <div class="form-group">
+                    <label for="linkUrl">链接地址</label>
+                    <input type="url" id="linkUrl" placeholder="https://..." required>
+                </div>
+                <div class="link-modal-actions">
+                    <button type="button" class="btn btn-cancel" id="cancelLinkModal">取消</button>
+                    <button type="submit" class="btn btn-save">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
     <div class="container">
         <!-- 日期提示 -->
-        <div class="date-tip" id="currentDate">
+        <div class="date-tip" id="dateTip">
             <i class="fas fa-calendar-alt"></i>
-            <span>2024年5月20日 星期一（任务每日自动刷新，未完成项将保留）</span>
+            <span id="currentDate"></span>
         </div>
 
-        <!-- 1. 用户状态面板 -->
-        <div class="panel status-panel">
-            <h3 class="panel-title"><i class="fas fa-user-circle"></i> 我的进度</h3>
-            <div class="status-item">
-                <div class="status-label">当前等级</div>
-                <div class="status-value" id="level">1</div>
-            </div>
-            <div class="status-item">
-                <div class="status-label">当前经验</div>
-                <div class="status-value" id="currentExp">0</div>
-                <div class="exp-bar-container">
-                    <div class="exp-bar" id="expBar"></div>
+        <!-- 用户状态面板 -->
+        <div class="panel">
+            <h2 class="panel-title">
+                <i class="fas fa-user-circle"></i> 我的任务状态
+            </h2>
+            <div class="status-panel">
+                <div class="status-item">
+                    <div class="status-label">总任务数</div>
+                    <div class="status-value" id="totalTasks">0</div>
                 </div>
-                <div class="status-label" id="expRatio">0/100</div>
-            </div>
-            <div class="status-item">
-                <div class="status-label">剩余点数</div>
-                <div class="status-value" id="points">0</div>
-            </div>
-            <div class="status-item">
-                <div class="status-label">今日完成</div>
-                <div class="status-value" id="todayCompleted">0</div>
+                <div class="status-item">
+                    <div class="status-label">已完成</div>
+                    <div class="status-value" id="completedTasks">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">待完成</div>
+                    <div class="status-value" id="pendingTasks">0</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">今日经验</div>
+                    <div class="status-value" id="todayExp">0</div>
+                    <div class="exp-bar-container">
+                        <div class="exp-bar" id="expBar"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 2. 添加任务表单 -->
-        <div class="panel add-task-panel">
-            <h3 class="panel-title"><i class="fas fa-plus-circle"></i> 添加新任务</h3>
+        <!-- 任务添加面板 -->
+        <div class="panel">
+            <h2 class="panel-title">
+                <i class="fas fa-plus-circle"></i> 添加新任务
+            </h2>
             <form class="add-task-form" id="addTaskForm">
-                <input type="text" class="form-input" id="taskTitle" placeholder="输入任务（如：学习JavaScript 1小时）" required>
-                <input type="number" class="form-input" id="taskPoints" min="1" value="10" placeholder="积分（至少1）" required>
-                <select class="form-input" id="taskPlanId" required>
-                    <option value="1">前端学习</option>
-                    <option value="2">Python学习</option>
-                    <option value="3">日常事务</option>
+                <input type="text" class="form-input" id="taskTitle" placeholder="输入任务名称..." required>
+                <select class="form-select" id="taskCategory" required>
+                    <option value="">选择分类</option>
+                    <option value="工作">工作</option>
+                    <option value="学习">学习</option>
+                    <option value="生活">生活</option>
+                    <option value="其他">其他</option>
                 </select>
-                <button type="submit" class="btn btn-add"><i class="fas fa-save"></i> 添加</button>
+                <input type="date" class="form-input" id="taskDate" required>
+                <input type="number" class="form-input" id="taskPoints" min="1" max="10" value="5" placeholder="经验值(1-10)">
+                <button type="submit" class="btn btn-add">
+                    <i class="fas fa-plus"></i> 添加
+                </button>
             </form>
         </div>
 
-        <!-- 3. 每日任务列表 -->
-        <div class="panel tasks-container">
-            <h3 class="panel-title"><i class="fas fa-list-alt"></i> 今日任务</h3>
-            <!-- 搜索栏 -->
-            <div class="task-search">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" id="taskSearch" placeholder="搜索任务（标题/备注）...">
+        <!-- 任务列表面板 -->
+        <div class="panel">
+            <h2 class="panel-title">
+                <i class="fas fa-list-alt"></i> 我的任务列表
+            </h2>
+            
+            <!-- 搜索 + 分类筛选 -->
+            <div class="task-search-filter">
+                <div class="task-search">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="taskSearch" placeholder="搜索任务...">
+                </div>
+                <div class="task-filter">
+                    <div class="filter-label">
+                        <i class="fas fa-filter"></i> 按分类筛选：
+                    </div>
+                    <div class="filter-options">
+                        <label class="filter-option">
+                            <input type="radio" name="categoryFilter" value="all" checked> 全部
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="categoryFilter" value="工作"> 工作
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="categoryFilter" value="学习"> 学习
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="categoryFilter" value="生活"> 生活
+                        </label>
+                        <label class="filter-option">
+                            <input type="radio" name="categoryFilter" value="其他"> 其他
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div id="taskList"></div>
+
+            <!-- 任务列表 -->
+            <div class="task-list" id="taskList">
+                <!-- 任务项将通过JS动态生成 -->
+                <div class="task-item" style="text-align: center; padding: 30px; color: #9EB2C0;">
+                    <i class="fas fa-tasks" style="font-size: 24px; margin-bottom: 10px;"></i>
+                    <p>暂无任务，点击上方"添加新任务"开始吧！</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        (function() {
-            // ---------------- 1. 核心数据定义（新增背景设置数据） ----------------
-            let playerData = {
-                level: 1,
-                currentExp: 0,
-                requiredExp: 100,
-                points: 0
-            };
+        // -------------------------- 基础工具函数 --------------------------
+        // 生成唯一ID
+        const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+        // 格式化日期
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        // 获取今日日期
+        const getToday = () => formatDate(new Date());
 
-            // 背景设置默认数据（本地存储优先级更高）
-            let bgSettings = {
-                presetBg: "https://picsum.photos/id/1068/1920/1080", // 预设背景URL
-                localBg: "", // 本地背景Base64（为空时使用预设）
-                opacity: 85 // 背景透明度（50-100）
-            };
-
-            // 任务库（保留原有结构）
-            const taskLibrary = {
-                1: [ 
-                    { title: "学习HTML语义化标签", note: "", link: "" },
-                    { title: "练习CSS Flex布局", note: "", link: "" },
-                    { title: "手写一个导航栏组件", note: "", link: "" },
-                    { title: "学习JavaScript事件冒泡", note: "", link: "" },
-                    { title: "用CSS实现卡片hover效果", note: "", link: "" },
-                    { title: "理解CSS盒模型", note: "", link: "" },
-                    { title: "学习Vue基础指令", note: "", link: "" }
-                ],
-                2: [ 
-                    { title: "学习Python列表推导式", note: "", link: "" },
-                    { title: "写一个文件读写脚本", note: "", link: "" },
-                    { title: "理解Python类与对象", note: "", link: "" },
-                    { title: "练习2道LeetCode简单题", note: "", link: "https://leetcode-cn.com" },
-                    { title: "学习Python装饰器", note: "", link: "" },
-                    { title: "用Pandas读取Excel文件", note: "", link: "" },
-                    { title: "实现一个简单计算器", note: "", link: "" }
-                ],
-                3: [ 
-                    { title: "早起晨跑30分钟", note: "建议6:30-7:00", link: "" },
-                    { title: "阅读书籍1小时", note: "", link: "" },
-                    { title: "整理桌面/房间", note: "", link: "" },
-                    { title: "写今日反思日记", note: "", link: "" },
-                    { title: "给家人打电话", note: "", link: "" },
-                    { title: "学习一道新菜品", note: "", link: "https://www.xiachufang.com" },
-                    { title: "冥想15分钟", note: "", link: "" }
-                ]
-            };
-
-            let dailyTasks = [];
-            const STORAGE_KEYS = {
-                player: 'startpage_playerData',
-                tasks: 'startpage_dailyTasks',
-                lastRefreshDate: 'startpage_lastRefreshDate',
-                bgSettings: 'startpage_bgSettings' // 新增背景设置存储键
-            };
-
-
-            // ---------------- 2. 工具函数（新增背景相关工具） ----------------
-            // 获取当前日期
-            function getCurrentDate() {
-                const date = new Date();
-                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        // -------------------------- 本地存储管理 --------------------------
+        const Storage = {
+            // 任务存储键
+            TASKS_KEY: 'daily_tasks',
+            // 背景设置存储键
+            BG_SETTINGS_KEY: 'bg_settings',
+            
+            // 获取任务列表
+            getTasks: () => {
+                const tasks = localStorage.getItem(Storage.TASKS_KEY);
+                return tasks ? JSON.parse(tasks) : [];
+            },
+            
+            // 保存任务列表
+            saveTasks: (tasks) => {
+                localStorage.setItem(Storage.TASKS_KEY, JSON.stringify(tasks));
+            },
+            
+            // 获取背景设置
+            getBgSettings: () => {
+                const settings = localStorage.getItem(Storage.BG_SETTINGS_KEY);
+                return settings ? JSON.parse(settings) : {
+                    type: 'preset', // preset: 预设图, local: 本地图
+                    url: 'https://picsum.photos/id/152/1920/1080',
+                    opacity: 90
+                };
+            },
+            
+            // 保存背景设置
+            saveBgSettings: (settings) => {
+                localStorage.setItem(Storage.BG_SETTINGS_KEY, JSON.stringify(settings));
             }
+        };
 
-            // 格式化日期显示
-            function formatDateForDisplay(dateStr) {
-                const date = new Date(dateStr);
-                const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-                return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekDays[date.getDay()]}`;
-            }
-
-            // 加载所有本地数据（含背景设置）
-            function loadData() {
-                // 加载用户进度
-                const savedPlayer = localStorage.getItem(STORAGE_KEYS.player);
-                if (savedPlayer) playerData = JSON.parse(savedPlayer);
-
-                // 加载背景设置（优先级：本地存储 > 默认）
-                const savedBgSettings = localStorage.getItem(STORAGE_KEYS.bgSettings);
-                if (savedBgSettings) bgSettings = JSON.parse(savedBgSettings);
-
-                // 加载任务数据
-                const savedTasks = localStorage.getItem(STORAGE_KEYS.tasks);
-                const lastRefreshDate = localStorage.getItem(STORAGE_KEYS.lastRefreshDate);
-                const today = getCurrentDate();
-
-                if (!savedTasks || !lastRefreshDate || lastRefreshDate !== today) {
-                    const oldTasks = savedTasks ? JSON.parse(savedTasks).map(task => ({
-                        note: task.note || "",
-                        link: task.link || "",
-                        ...task
-                    })) : [];
-                    dailyTasks = generateDailyTasks(oldTasks);
-                    localStorage.setItem(STORAGE_KEYS.lastRefreshDate, today);
-                } else {
-                    dailyTasks = JSON.parse(savedTasks).map(task => ({
-                        note: task.note || "",
-                        link: task.link || "",
-                        ...task
-                    }));
-                }
-
-                // 加载背景设置到界面
-                applyBgSettings();
-            }
-
-            // 保存所有数据（含背景设置）
-            function saveData() {
-                localStorage.setItem(STORAGE_KEYS.player, JSON.stringify(playerData));
-                localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(dailyTasks));
-                localStorage.setItem(STORAGE_KEYS.bgSettings, JSON.stringify(bgSettings));
-            }
-
-            // 应用背景设置（设置body背景和遮罩透明度）
-            function applyBgSettings() {
+        // -------------------------- 背景管理 --------------------------
+        const Background = {
+            init: () => {
+                // 加载保存的背景设置
+                const bgSettings = Storage.getBgSettings();
+                Background.applySettings(bgSettings);
+                
+                // 绑定背景设置面板事件
+                Background.bindEvents();
+            },
+            
+            // 应用背景设置
+            applySettings: (settings) => {
                 const body = document.body;
                 const bgOverlay = document.querySelector('.bg-overlay');
                 
-                // 设置背景图（本地图片优先）
-                const bgUrl = bgSettings.localBg || bgSettings.presetBg;
-                body.style.background = `url('${bgUrl}') center/cover no-repeat fixed`;
+                // 设置背景图
+                if (settings.type === 'preset' || settings.type === 'local') {
+                    body.style.backgroundImage = `url(${settings.url})`;
+                    body.style.backgroundSize = 'cover';
+                    body.style.backgroundPosition = 'center';
+                    body.style.backgroundRepeat = 'no-repeat';
+                }
                 
-                // 设置遮罩透明度
-                const opacity = bgSettings.opacity / 100;
+                // 设置透明度
+                const opacity = settings.opacity / 100;
                 bgOverlay.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
+                document.getElementById('bgOpacitySlider').value = settings.opacity;
+                document.getElementById('opacityValue').textContent = `当前透明度：${settings.opacity}%`;
                 
-                // 更新设置面板状态（预设选中、透明度滑块、本地预览）
-                updateBgSettingsPanel();
-            }
-
-            // 更新背景设置面板UI
-            function updateBgSettingsPanel() {
-                // 选中当前预设背景
-                document.querySelectorAll('.preset-bg-item').forEach(item => {
-                    item.classList.remove('selected');
-                    if (item.dataset.bg === bgSettings.presetBg) {
+                // 选中预设背景项
+                const presetItems = document.querySelectorAll('.preset-bg-item');
+                presetItems.forEach(item => {
+                    if (item.dataset.bg === settings.url && settings.type === 'preset') {
                         item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
                     }
                 });
-
-                // 更新透明度滑块和数值
-                const opacitySlider = document.getElementById('bgOpacitySlider');
-                const opacityValue = document.getElementById('opacityValue');
-                opacitySlider.value = bgSettings.opacity;
-                opacityValue.textContent = `当前透明度：${bgSettings.opacity}%`;
-
-                // 显示本地图片预览（若有）
-                const localBgPreview = document.getElementById('localBgPreview');
-                const localBgImg = localBgPreview.querySelector('img');
-                if (bgSettings.localBg) {
-                    localBgImg.src = bgSettings.localBg;
-                    localBgPreview.style.display = 'block';
-                } else {
-                    localBgPreview.style.display = 'none';
-                }
-            }
-
-            // 生成唯一任务ID
-            function generateUniqueId() {
-                return Date.now() + Math.floor(Math.random() * 1000);
-            }
-
-
-            // ---------------- 3. 任务生成逻辑（保留原有） ----------------
-            function generateDailyTasks(yesterdayTasks = []) {
-                const unfinishedTasks = yesterdayTasks
-                    .filter(task => !task.completed)
-                    .map(task => ({
-                        note: task.note || "",
-                        link: task.link || "",
-                        id: generateUniqueId(),
-                        ...task
-                    }));
-
-                const newTasks = [];
-                Object.keys(taskLibrary).forEach(planId => {
-                    const planTasks = taskLibrary[planId];
-                    const taskCount = Math.floor(Math.random() * 2) + 1;
-                    const shuffled = [...planTasks].sort(() => 0.5 - Math.random());
-                    const selected = shuffled.slice(0, taskCount);
-
-                    selected.forEach(task => {
-                        newTasks.push({
-                            id: generateUniqueId(),
-                            title: task.title,
-                            note: task.note || "",
-                            link: task.link || "",
-                            points: Math.floor(Math.random() * 10) + 10,
-                            completed: false,
-                            planId: parseInt(planId)
-                        });
+            },
+            
+            // 绑定背景相关事件
+            bindEvents: () => {
+                // 打开背景设置面板
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    document.getElementById('bgSettingsPanel').classList.add('active');
+                });
+                
+                // 关闭背景设置面板
+                document.getElementById('closePanel').addEventListener('click', () => {
+                    document.getElementById('bgSettingsPanel').classList.remove('active');
+                });
+                
+                // 选择预设背景
+                const presetItems = document.querySelectorAll('.preset-bg-item');
+                presetItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        presetItems.forEach(i => i.classList.remove('selected'));
+                        item.classList.add('selected');
+                        const newSettings = {
+                            ...Storage.getBgSettings(),
+                            type: 'preset',
+                            url: item.dataset.bg
+                        };
+                        // 立即保存预设背景设置
+                        Storage.saveBgSettings(newSettings);
+                        Background.applySettings(newSettings);
                     });
                 });
-
-                return [...unfinishedTasks, ...newTasks];
+                
+                // 上传本地背景图（修复：立即保存到localStorage）
+                document.getElementById('localBgInput').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        // 检查文件大小（限制为5MB，避免localStorage溢出）
+                        const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+                        if (file.size > MAX_SIZE) {
+                            alert('图片大小不能超过5MB，请选择较小的图片！');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const newSettings = {
+                                ...Storage.getBgSettings(),
+                                type: 'local',
+                                url: event.target.result
+                            };
+                            // 关键修复：立即保存本地图片设置到localStorage
+                            Storage.saveBgSettings(newSettings);
+                            Background.applySettings(newSettings);
+                            alert('本地图片已上传并永久保存！');
+                        };
+                        reader.readAsDataURL(file); // 转Base64保存
+                    }
+                });
+                
+                // 调整背景透明度
+                document.getElementById('bgOpacitySlider').addEventListener('input', (e) => {
+                    const opacity = e.target.value;
+                    document.getElementById('opacityValue').textContent = `当前透明度：${opacity}%`;
+                    const bgOverlay = document.querySelector('.bg-overlay');
+                    bgOverlay.style.backgroundColor = `rgba(255, 255, 255, ${opacity / 100})`;
+                });
+                
+                // 保存背景设置
+                document.getElementById('saveBgSettings').addEventListener('click', () => {
+                    // 获取当前显示的背景设置（无论是预设还是本地）
+                    const body = document.body;
+                    const bgImage = body.style.backgroundImage;
+                    let bgSettings = Storage.getBgSettings();
+                    
+                    // 提取当前背景URL（处理预设和本地图片）
+                    if (bgImage) {
+                        // 从backgroundImage样式中提取URL
+                        const urlMatch = bgImage.match(/url\(['"]?(.*?)['"]?\)/);
+                        if (urlMatch && urlMatch[1]) {
+                            bgSettings.url = urlMatch[1];
+                        }
+                    }
+                    
+                    // 更新透明度
+                    bgSettings.opacity = parseInt(document.getElementById('bgOpacitySlider').value);
+                    
+                    // 保存并应用
+                    Storage.saveBgSettings(bgSettings);
+                    Background.applySettings(bgSettings);
+                    
+                    // 关闭面板并提示
+                    document.getElementById('bgSettingsPanel').classList.remove('active');
+                    alert('背景设置已保存！');
+                });
             }
+        };
 
-
-            // ---------------- 4. 界面渲染函数（保留原有，优化视觉反馈） ----------------
-            function renderCurrentDate() {
-                const today = getCurrentDate();
-                document.getElementById('currentDate').innerHTML = `
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>${formatDateForDisplay(today)}（任务每日自动刷新，未完成项将保留）</span>
-                `;
-            }
-
-            function renderPlayerStatus() {
-                const todayCompleted = dailyTasks.filter(task => task.completed).length;
-
-                document.getElementById('level').textContent = playerData.level;
-                document.getElementById('currentExp').textContent = playerData.currentExp;
-                document.getElementById('points').textContent = playerData.points;
-                document.getElementById('todayCompleted').textContent = todayCompleted;
-
-                const expRatio = (playerData.currentExp / playerData.requiredExp) * 100;
-                document.getElementById('expBar').style.width = `${Math.min(expRatio, 100)}%`;
-                document.getElementById('expRatio').textContent = `${playerData.currentExp}/${playerData.requiredExp}`;
-            }
-
-            function getFilteredTasks(keyword) {
-                if (!keyword.trim()) return dailyTasks;
-                const lowerKeyword = keyword.toLowerCase();
-                return dailyTasks.filter(task => 
-                    task.title.toLowerCase().includes(lowerKeyword) || 
-                    task.note.toLowerCase().includes(lowerKeyword)
-                );
-            }
-
-            function renderTasks(keyword = "") {
-                const filteredTasks = getFilteredTasks(keyword);
-                const taskListEl = document.getElementById('taskList');
-                taskListEl.innerHTML = '';
-
+        // -------------------------- 任务管理 --------------------------
+        const TaskManager = {
+            init: () => {
+                // 初始化日期显示
+                TaskManager.updateDateDisplay();
+                
+                // 加载任务列表
+                TaskManager.renderTasks();
+                
+                // 绑定任务相关事件
+                TaskManager.bindEvents();
+                
+                // 更新任务状态统计
+                TaskManager.updateTaskStats();
+            },
+            
+            // 更新日期显示
+            updateDateDisplay: () => {
+                const now = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+                
+                // 设置默认任务日期为今天
+                document.getElementById('taskDate').value = getToday();
+            },
+            
+            // 渲染任务列表
+            renderTasks: (filter = 'all', search = '') => {
+                const taskList = document.getElementById('taskList');
+                const tasks = Storage.getTasks();
+                
+                // 过滤任务（分类筛选 + 搜索）
+                const filteredTasks = tasks.filter(task => {
+                    const matchCategory = filter === 'all' || task.category === filter;
+                    const matchSearch = task.title.toLowerCase().includes(search.toLowerCase());
+                    return matchCategory && matchSearch;
+                });
+                
+                // 清空列表
+                taskList.innerHTML = '';
+                
+                // 无任务时显示提示
                 if (filteredTasks.length === 0) {
-                    taskListEl.innerHTML = `
-                        <div style="text-align:center; padding:30px; color:#718096; background:#f7fafc; border-radius:12px; border:1px solid #f0f0f0;">
-                            <i class="fas fa-search" style="font-size:24px; margin-bottom:12px; color:#a0aec0;"></i>
-                            <p>未找到匹配任务，请尝试其他关键词~</p>
+                    taskList.innerHTML = `
+                        <div class="task-item" style="text-align: center; padding: 30px; color: #9EB2C0;">
+                            <i class="fas fa-tasks" style="font-size: 24px; margin-bottom: 10px;"></i>
+                            <p>暂无匹配的任务</p>
                         </div>
                     `;
                     return;
                 }
-
+                
+                // 渲染任务项
                 filteredTasks.forEach(task => {
-                    const planName = task.planId === 1 ? '前端学习' : task.planId === 2 ? 'Python学习' : '日常事务';
-                    const noteContent = task.note.trim() || '点击添加备注';
-                    const linkContent = task.link.trim() || '点击添加链接';
-                    const actionBtn = task.completed 
-                        ? `<button class="btn btn-cancel-complete" data-id="${task.id}"><i class="fas fa-undo"></i> 取消完成</button>`
-                        : `<button class="btn btn-complete" data-id="${task.id}"><i class="fas fa-check"></i> 完成</button>`;
-
-                    const taskEl = document.createElement('div');
-                    taskEl.className = 'task-item';
-                    taskEl.dataset.id = task.id;
-                    taskEl.innerHTML = `
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item';
+                    taskItem.dataset.id = task.id;
+                    
+                    // 任务链接渲染
+                    let linksHtml = '';
+                    if (task.links && task.links.length > 0) {
+                        linksHtml = `
+                            <div class="task-links">
+                                <div class="links-header">
+                                    <div class="links-label">
+                                        <i class="fas fa-link"></i> 相关链接
+                                    </div>
+                                    <button class="btn-add-link" data-task-id="${task.id}">
+                                        <i class="fas fa-plus"></i> 添加
+                                    </button>
+                                </div>
+                                <div class="links-list">
+                                    ${task.links.map((link, index) => `
+                                        <div class="link-item" data-link-index="${index}">
+                                            <a href="${link.url}" class="link-url" target="_blank" rel="noopener">
+                                                ${link.name || link.url}
+                                            </a>
+                                            <div class="link-actions">
+                                                <button class="btn-edit-link" data-task-id="${task.id}" data-link-index="${index}">
+                                                    <i class="fas fa-edit"></i> 编辑
+                                                </button>
+                                                <button class="btn-delete-link" data-task-id="${task.id}" data-link-index="${index}">
+                                                    <i class="fas fa-trash"></i> 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        linksHtml = `
+                            <div class="task-links">
+                                <div class="links-header">
+                                    <div class="links-label">
+                                        <i class="fas fa-link"></i> 相关链接
+                                    </div>
+                                    <button class="btn-add-link" data-task-id="${task.id}">
+                                        <i class="fas fa-plus"></i> 添加
+                                    </button>
+                                </div>
+                                <div class="no-links">
+                                    <i class="fas fa-info-circle"></i> 暂无链接，点击"添加"按钮添加
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // 任务备注渲染
+                    let noteHtml = '';
+                    if (task.note) {
+                        noteHtml = `
+                            <div class="task-note">
+                                <div class="note-label">
+                                    <i class="fas fa-sticky-note"></i> 任务备注
+                                </div>
+                                <div class="note-content" data-task-id="${task.id}">
+                                    ${task.note}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        noteHtml = `
+                            <div class="task-note">
+                                <div class="note-label">
+                                    <i class="fas fa-sticky-note"></i> 任务备注
+                                </div>
+                                <div class="note-content" data-task-id="${task.id}">
+                                    <i class="fas fa-pen"></i> 点击添加备注
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // 任务HTML结构
+                    taskItem.innerHTML = `
                         <div class="task-header">
                             <div class="task-info">
-                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
-                                <span class="task-title ${task.completed ? 'completed' : ''}">${task.title}</span>
+                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-task-id="${task.id}">
+                                <div class="task-title ${task.completed ? 'completed' : ''}">${task.title}</div>
                             </div>
                             <div class="task-actions">
-                                ${actionBtn}
-                                <button class="btn btn-delete" data-id="${task.id}"><i class="fas fa-trash"></i> 删除</button>
+                                ${task.completed ? 
+                                    `<button class="btn btn-cancel-complete" data-task-id="${task.id}">
+                                        <i class="fas fa-undo"></i> 撤销完成
+                                    </button>` : 
+                                    `<button class="btn btn-complete" data-task-id="${task.id}">
+                                        <i class="fas fa-check"></i> 完成
+                                    </button>`
+                                }
+                                <button class="btn btn-delete" data-task-id="${task.id}">
+                                    <i class="fas fa-trash"></i> 删除
+                                </button>
                             </div>
                         </div>
                         <div class="task-meta">
-                            <span class="task-plan"><i class="fas fa-tags"></i> ${planName}</span>
-                            <span class="task-points"><i class="fas fa-star"></i> +${task.points} 分</span>
-                        </div>
-                        <div class="task-extension">
-                            <div class="ext-item">
-                                <div class="ext-label"><i class="fas fa-sticky-note"></i> 备注</div>
-                                <div class="ext-content note" data-type="note" data-id="${task.id}">${noteContent}</div>
+                            <div class="task-category">
+                                <i class="fas fa-tag"></i> ${task.category}
                             </div>
-                            <div class="ext-item">
-                                <div class="ext-label"><i class="fas fa-link"></i> 关联链接</div>
-                                <div class="ext-content link ${!task.link.trim() ? '' : 'link-active'}" data-type="link" data-id="${task.id}" 
-                                    ${task.link.trim() ? `onclick="window.open('${task.link}', '_blank')"` : ''}>
-                                    ${linkContent}
-                                </div>
+                            <div class="task-plan">
+                                <i class="fas fa-calendar"></i> ${task.date}
+                            </div>
+                            <div class="task-points">
+                                <i class="fas fa-star"></i> ${task.points}经验
                             </div>
                         </div>
+                        ${linksHtml}
+                        ${noteHtml}
                     `;
-                    taskListEl.appendChild(taskEl);
+                    
+                    taskList.appendChild(taskItem);
                 });
-
-                bindAllEvents();
-            }
-
-
-            // ---------------- 5. 事件绑定（新增背景设置相关事件） ----------------
-            function bindAllEvents() {
-                // 1. 任务基础交互（保留原有）
-                document.querySelectorAll('.task-checkbox, .btn-complete, .btn-cancel-complete').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        const taskId = parseInt(e.target.dataset.id || e.target.parentElement.dataset.id);
-                        toggleTaskComplete(taskId);
-                    });
+            },
+            
+            // 更新任务状态统计
+            updateTaskStats: () => {
+                const tasks = Storage.getTasks();
+                const total = tasks.length;
+                const completed = tasks.filter(task => task.completed).length;
+                const pending = total - completed;
+                
+                // 计算今日经验（仅统计今日完成的任务）
+                const today = getToday();
+                const todayExp = tasks.reduce((sum, task) => {
+                    if (task.completed && task.date === today) {
+                        return sum + parseInt(task.points);
+                    }
+                    return sum;
+                }, 0);
+                
+                // 更新DOM
+                document.getElementById('totalTasks').textContent = total;
+                document.getElementById('completedTasks').textContent = completed;
+                document.getElementById('pendingTasks').textContent = pending;
+                document.getElementById('todayExp').textContent = todayExp;
+                
+                // 更新经验条（满经验100）
+                const expPercent = Math.min(100, (todayExp / 100) * 100);
+                document.getElementById('expBar').style.width = `${expPercent}%`;
+            },
+            
+            // 添加任务
+            addTask: (taskData) => {
+                const tasks = Storage.getTasks();
+                const newTask = {
+                    id: generateId(),
+                    completed: false,
+                    links: [], // 初始化空链接数组
+                    note: '',  // 初始化空备注
+                    ...taskData
+                };
+                tasks.unshift(newTask); // 新增任务放最前面
+                Storage.saveTasks(tasks);
+                TaskManager.renderTasks();
+                TaskManager.updateTaskStats();
+            },
+            
+            // 切换任务完成状态
+            toggleTaskComplete: (taskId) => {
+                const tasks = Storage.getTasks();
+                const updatedTasks = tasks.map(task => {
+                    if (task.id === taskId) {
+                        return { ...task, completed: !task.completed };
+                    }
+                    return task;
                 });
-
-                document.querySelectorAll('.btn-delete').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        const taskId = parseInt(e.target.dataset.id || e.target.parentElement.dataset.id);
-                        if (confirm('确定要删除这个任务吗？删除后不可恢复~')) {
-                            deleteTask(taskId);
-                        }
-                    });
+                Storage.saveTasks(updatedTasks);
+                TaskManager.renderTasks();
+                TaskManager.updateTaskStats();
+            },
+            
+            // 删除任务
+            deleteTask: (taskId) => {
+                if (confirm('确定要删除这个任务吗？删除后无法恢复！')) {
+                    const tasks = Storage.getTasks();
+                    const updatedTasks = tasks.filter(task => task.id !== taskId);
+                    Storage.saveTasks(updatedTasks);
+                    TaskManager.renderTasks();
+                    TaskManager.updateTaskStats();
+                }
+            },
+            
+            // 更新任务备注
+            updateTaskNote: (taskId, note) => {
+                const tasks = Storage.getTasks();
+                const updatedTasks = tasks.map(task => {
+                    if (task.id === taskId) {
+                        return { ...task, note };
+                    }
+                    return task;
                 });
-
-                document.querySelectorAll('.ext-content').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        if (el.classList.contains('link') && el.classList.contains('link-active')) return;
+                Storage.saveTasks(updatedTasks);
+                TaskManager.renderTasks();
+            },
+            
+            // 管理任务链接（添加/编辑/删除）
+            manageTaskLink: (action, taskId, linkData, linkIndex = -1) => {
+                const tasks = Storage.getTasks();
+                const updatedTasks = tasks.map(task => {
+                    if (task.id === taskId) {
+                        const links = [...(task.links || [])];
                         
-                        const taskId = parseInt(el.dataset.id);
-                        const type = el.dataset.type;
-                        const task = dailyTasks.find(t => t.id === taskId);
-                        if (!task) return;
-
-                        const inputHtml = type === 'note' 
-                            ? `<textarea class="ext-edit-note" data-id="${taskId}" data-type="note">${task.note || ''}</textarea>`
-                            : `<input type="url" class="ext-edit-link" data-id="${taskId}" data-type="link" placeholder="输入链接（http://开头）" value="${task.link || ''}">`;
-                        
-                        el.innerHTML = `
-                            ${inputHtml}
-                            <div class="ext-edit-actions">
-                                <button class="btn btn-save" data-id="${taskId}" data-type="${type}"><i class="fas fa-save"></i> 保存</button>
-                                <button class="btn btn-cancel" data-id="${taskId}" data-type="${type}"><i class="fas fa-times"></i> 取消</button>
-                            </div>
-                        `;
-
-                        const inputEl = el.querySelector('.ext-edit-note, .ext-edit-link');
-                        if (inputEl) inputEl.focus();
-                        e.stopPropagation();
-                    });
-                });
-
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('btn-save')) {
-                        const taskId = parseInt(e.target.dataset.id);
-                        const type = e.target.dataset.type;
-                        const taskEl = document.querySelector(`.task-item[data-id="${taskId}"]`);
-                        const inputEl = taskEl.querySelector(`.ext-edit-${type}`);
-                        const contentEl = taskEl.querySelector(`.ext-content[data-type="${type}"]`);
-                        const task = dailyTasks.find(t => t.id === taskId);
-                        if (!task || !inputEl || !contentEl) return;
-
-                        task[type] = inputEl.value.trim();
-                        const content = task[type] || (type === 'note' ? '点击添加备注' : '点击添加链接');
-                        contentEl.textContent = content;
-
-                        if (type === 'link') {
-                            if (task.link.trim()) {
-                                contentEl.classList.add('link-active');
-                                contentEl.setAttribute('onclick', `window.open('${task.link}', '_blank')`);
-                            } else {
-                                contentEl.classList.remove('link-active');
-                                contentEl.removeAttribute('onclick');
-                            }
+                        switch (action) {
+                            case 'add':
+                                links.push(linkData);
+                                break;
+                            case 'edit':
+                                if (linkIndex >= 0 && linkIndex < links.length) {
+                                    links[linkIndex] = linkData;
+                                }
+                                break;
+                            case 'delete':
+                                if (linkIndex >= 0 && linkIndex < links.length) {
+                                    links.splice(linkIndex, 1);
+                                }
+                                break;
                         }
-
-                        saveData();
-                        renderTasks(document.getElementById('taskSearch').value);
+                        
+                        return { ...task, links };
                     }
+                    return task;
                 });
-
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('btn-cancel')) {
-                        renderTasks(document.getElementById('taskSearch').value);
-                    }
-                });
-
-                document.getElementById('taskSearch').addEventListener('input', (e) => {
-                    renderTasks(e.target.value);
-                });
-
-                // 2. 背景设置面板交互（新增）
-                // 打开设置面板
-                document.getElementById('settingsBtn').addEventListener('click', () => {
-                    document.getElementById('bgSettingsPanel').classList.add('active');
-                });
-
-                // 关闭设置面板
-                document.getElementById('closePanel').addEventListener('click', () => {
-                    document.getElementById('bgSettingsPanel').classList.remove('active');
-                });
-
-                // 点击面板外部关闭
-                document.addEventListener('click', (e) => {
-                    const panel = document.getElementById('bgSettingsPanel');
-                    if (!panel.contains(e.target) && e.target !== document.getElementById('settingsBtn')) {
-                        panel.classList.remove('active');
-                    }
-                });
-
-                // 选择预设背景
-                document.querySelectorAll('.preset-bg-item').forEach(item => {
-                    item.addEventListener('click', () => {
-                        document.querySelectorAll('.preset-bg-item').forEach(i => i.classList.remove('selected'));
-                        item.classList.add('selected');
-                        bgSettings.presetBg = item.dataset.bg;
-                        // 选择预设时清空本地背景（避免优先级冲突）
-                        bgSettings.localBg = "";
-                        document.getElementById('localBgPreview').style.display = 'none';
-                    });
-                });
-
-                // 上传本地背景
-                document.getElementById('localBgInput').addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    // 验证文件类型
-                    if (!file.type.startsWith('image/')) {
-                        alert('请选择图片文件（jpg、png等）！');
-                        return;
-                    }
-
-                    // 读取图片为Base64
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        bgSettings.localBg = event.target.result;
-                        // 显示预览
-                        const localBgPreview = document.getElementById('localBgPreview');
-                        const localBgImg = localBgPreview.querySelector('img');
-                        localBgImg.src = bgSettings.localBg;
-                        localBgPreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                });
-
-                // 调节背景透明度
-                document.getElementById('bgOpacitySlider').addEventListener('input', (e) => {
-                    const value = parseInt(e.target.value);
-                    bgSettings.opacity = value;
-                    document.getElementById('opacityValue').textContent = `当前透明度：${value}%`;
-                    // 实时预览透明度（未保存也能看效果）
-                    const bgOverlay = document.querySelector('.bg-overlay');
-                    bgOverlay.style.backgroundColor = `rgba(255, 255, 255, ${value / 100})`;
-                });
-
-                // 保存背景设置
-                document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-                    saveData();
-                    applyBgSettings();
-                    document.getElementById('bgSettingsPanel').classList.remove('active');
-                    alert('背景设置已保存！下次打开将自动应用~');
-                });
-
-                // 3. 添加任务表单（保留原有）
+                
+                Storage.saveTasks(updatedTasks);
+                TaskManager.renderTasks();
+            },
+            
+            // 绑定任务相关事件
+            bindEvents: () => {
+                // 添加任务表单提交
                 document.getElementById('addTaskForm').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const title = document.getElementById('taskTitle').value;
-                    const points = document.getElementById('taskPoints').value;
-                    const planId = document.getElementById('taskPlanId').value;
-
-                    if (!title.trim()) {
-                        alert('请输入任务标题哦~');
-                        return;
-                    }
-
-                    addNewTask(title, points, planId);
+                    const taskData = {
+                        title: document.getElementById('taskTitle').value.trim(),
+                        category: document.getElementById('taskCategory').value,
+                        date: document.getElementById('taskDate').value,
+                        points: parseInt(document.getElementById('taskPoints').value)
+                    };
+                    
+                    TaskManager.addTask(taskData);
+                    // 重置表单
                     e.target.reset();
-                    document.getElementById('taskTitle').focus();
+                    document.getElementById('taskDate').value = getToday();
+                    document.getElementById('taskPoints').value = 5;
+                });
+                
+                // 任务复选框切换完成状态（事件委托）
+                document.getElementById('taskList').addEventListener('change', (e) => {
+                    if (e.target.classList.contains('task-checkbox')) {
+                        const taskId = e.target.dataset.taskId;
+                        TaskManager.toggleTaskComplete(taskId);
+                    }
+                });
+                
+                // 完成/撤销完成按钮（事件委托）
+                document.getElementById('taskList').addEventListener('click', (e) => {
+                    // 完成任务
+                    if (e.target.closest('.btn-complete')) {
+                        const taskId = e.target.closest('.btn-complete').dataset.taskId;
+                        TaskManager.toggleTaskComplete(taskId);
+                    }
+                    
+                    // 撤销完成
+                    if (e.target.closest('.btn-cancel-complete')) {
+                        const taskId = e.target.closest('.btn-cancel-complete').dataset.taskId;
+                        TaskManager.toggleTaskComplete(taskId);
+                    }
+                    
+                    // 删除任务
+                    if (e.target.closest('.btn-delete')) {
+                        const taskId = e.target.closest('.btn-delete').dataset.taskId;
+                        TaskManager.deleteTask(taskId);
+                    }
+                    
+                    // 添加链接
+                    if (e.target.closest('.btn-add-link')) {
+                        const taskId = e.target.closest('.btn-add-link').dataset.taskId;
+                        LinkModal.open('add', taskId);
+                    }
+                    
+                    // 编辑链接
+                    if (e.target.closest('.btn-edit-link')) {
+                        const btn = e.target.closest('.btn-edit-link');
+                        const taskId = btn.dataset.taskId;
+                        const linkIndex = parseInt(btn.dataset.linkIndex);
+                        const tasks = Storage.getTasks();
+                        const task = tasks.find(t => t.id === taskId);
+                        if (task && task.links && task.links[linkIndex]) {
+                            LinkModal.open('edit', taskId, linkIndex, task.links[linkIndex]);
+                        }
+                    }
+                    
+                    // 删除链接
+                    if (e.target.closest('.btn-delete-link')) {
+                        const btn = e.target.closest('.btn-delete-link');
+                        const taskId = btn.dataset.taskId;
+                        const linkIndex = parseInt(btn.dataset.linkIndex);
+                        if (confirm('确定要删除这个链接吗？')) {
+                            TaskManager.manageTaskLink('delete', taskId, null, linkIndex);
+                        }
+                    }
+                    
+                    // 编辑任务备注
+                    if (e.target.closest('.note-content')) {
+                        const noteContent = e.target.closest('.note-content');
+                        const taskId = noteContent.dataset.taskId;
+                        const currentNote = noteContent.textContent.trim().replace(/^<i class="fas fa-pen"><\/i> 点击添加备注$/, '');
+                        
+                        // 替换为输入框
+                        noteContent.outerHTML = `
+                            <textarea class="note-edit" data-task-id="${taskId}">${currentNote}</textarea>
+                            <div class="note-actions">
+                                <button class="btn btn-cancel btn-cancel-note">取消</button>
+                                <button class="btn btn-save btn-save-note" data-task-id="${taskId}">保存</button>
+                            </div>
+                        `;
+                        
+                        // 自动聚焦输入框
+                        const noteEdit = document.querySelector('.note-edit');
+                        noteEdit.focus();
+                        // 光标移到最后
+                        noteEdit.selectionStart = noteEdit.selectionEnd = noteEdit.value.length;
+                    }
+                    
+                    // 取消备注编辑
+                    if (e.target.closest('.btn-cancel-note')) {
+                        TaskManager.renderTasks();
+                    }
+                    
+                    // 保存备注编辑
+                    if (e.target.closest('.btn-save-note')) {
+                        const btn = e.target.closest('.btn-save-note');
+                        const taskId = btn.dataset.taskId;
+                        const noteEdit = document.querySelector('.note-edit');
+                        const newNote = noteEdit.value.trim();
+                        TaskManager.updateTaskNote(taskId, newNote);
+                    }
+                });
+                
+                // 任务搜索功能
+                document.getElementById('taskSearch').addEventListener('input', (e) => {
+                    const searchTerm = e.target.value;
+                    const filter = document.querySelector('input[name="categoryFilter"]:checked').value;
+                    TaskManager.renderTasks(filter, searchTerm);
+                });
+                
+                // 任务分类筛选功能
+                document.querySelectorAll('input[name="categoryFilter"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        const filter = e.target.value;
+                        const searchTerm = document.getElementById('taskSearch').value;
+                        TaskManager.renderTasks(filter, searchTerm);
+                    });
                 });
             }
+        };
 
-
-            // ---------------- 6. 任务交互逻辑（保留原有） ----------------
-            function toggleTaskComplete(taskId) {
-                const taskIndex = dailyTasks.findIndex(task => task.id === taskId);
-                if (taskIndex === -1) return;
-
-                const task = dailyTasks[taskIndex];
-                const isNowCompleted = !task.completed;
-
-                task.completed = isNowCompleted;
-                dailyTasks[taskIndex] = task;
-
-                const pointsChange = isNowCompleted ? task.points : -task.points;
-                const expChange = isNowCompleted ? task.points * 2 : -task.points * 2;
-
-                playerData.points += pointsChange;
-                playerData.currentExp += expChange;
-
-                playerData.points = Math.max(playerData.points, 0);
-                playerData.currentExp = Math.max(playerData.currentExp, 0);
-
-                checkLevelUp();
-                saveData();
-                renderTasks(document.getElementById('taskSearch').value);
-                renderPlayerStatus();
-
-                const tip = isNowCompleted 
-                    ? `🎉 任务完成！获得 ${task.points} 积分 + ${task.points * 2} 经验！`
-                    : `🔄 已取消任务完成状态，扣除 ${Math.abs(pointsChange)} 积分 + ${Math.abs(expChange)} 经验`;
-                alert(tip);
-            }
-
-            function checkLevelUp() {
-                while (playerData.currentExp >= playerData.requiredExp) {
-                    playerData.level += 1;
-                    playerData.currentExp -= playerData.requiredExp;
-                    playerData.requiredExp = Math.floor(playerData.requiredExp * 1.5);
-                    playerData.points += 5;
-                    alert(`🎊 恭喜升级到 Lv.${playerData.level}！获得 5 积分奖励！`);
+        // -------------------------- 链接模态框管理 --------------------------
+        const LinkModal = {
+            // 打开链接模态框
+            open: (mode, taskId, linkIndex = -1, linkData = null) => {
+                const modal = document.getElementById('linkModal');
+                const title = document.getElementById('linkModalTitle');
+                const taskIdInput = document.getElementById('linkTaskId');
+                const linkIndexInput = document.getElementById('linkIndex');
+                const linkNameInput = document.getElementById('linkName');
+                const linkUrlInput = document.getElementById('linkUrl');
+                
+                // 设置模态框标题
+                title.textContent = mode === 'add' ? '添加链接' : '编辑链接';
+                
+                // 设置表单数据
+                taskIdInput.value = taskId;
+                linkIndexInput.value = linkIndex;
+                
+                if (mode === 'edit' && linkData) {
+                    linkNameInput.value = linkData.name || '';
+                    linkUrlInput.value = linkData.url || '';
+                } else {
+                    // 清空表单
+                    linkNameInput.value = '';
+                    linkUrlInput.value = '';
                 }
-            }
-
-            function deleteTask(taskId) {
-                const taskIndex = dailyTasks.findIndex(task => task.id === taskId);
-                if (taskIndex === -1) return;
-
-                const task = dailyTasks[taskIndex];
-                if (task.completed) {
-                    playerData.points -= task.points;
-                    playerData.currentExp -= task.points * 2;
-                    playerData.points = Math.max(playerData.points, 0);
-                    playerData.currentExp = Math.max(playerData.currentExp, 0);
+                
+                // 显示模态框
+                modal.classList.add('active');
+                // 自动聚焦到第一个输入框
+                linkNameInput.focus();
+            },
+            
+            // 关闭链接模态框
+            close: () => {
+                document.getElementById('linkModal').classList.remove('active');
+                // 重置表单
+                document.getElementById('linkModalForm').reset();
+            },
+            
+            // 保存链接
+            save: (e) => {
+                e.preventDefault();
+                const taskId = document.getElementById('linkTaskId').value;
+                const linkIndex = parseInt(document.getElementById('linkIndex').value);
+                const linkName = document.getElementById('linkName').value.trim();
+                const linkUrl = document.getElementById('linkUrl').value.trim();
+                
+                // 验证链接URL
+                if (!linkUrl) {
+                    alert('请输入链接地址');
+                    return;
                 }
-
-                dailyTasks.splice(taskIndex, 1);
-                saveData();
-                renderTasks(document.getElementById('taskSearch').value);
-                renderPlayerStatus();
-            }
-
-            function addNewTask(title, points, planId) {
-                const newTask = {
-                    id: generateUniqueId(),
-                    title: title.trim(),
-                    note: "",
-                    link: "",
-                    points: parseInt(points),
-                    completed: false,
-                    planId: parseInt(planId)
+                
+                // 简单的URL格式验证
+                try {
+                    new URL(linkUrl);
+                } catch (error) {
+                    alert('请输入有效的链接地址（例如：https://example.com）');
+                    return;
+                }
+                
+                // 准备链接数据
+                const linkData = {
+                    name: linkName || linkUrl,
+                    url: linkUrl
                 };
-
-                dailyTasks.unshift(newTask);
-                saveData();
-                renderTasks(document.getElementById('taskSearch').value);
+                
+                // 根据模式执行不同操作
+                if (linkIndex === -1) {
+                    // 添加新链接
+                    TaskManager.manageTaskLink('add', taskId, linkData);
+                } else {
+                    // 编辑现有链接
+                    TaskManager.manageTaskLink('edit', taskId, linkData, linkIndex);
+                }
+                
+                // 关闭模态框
+                LinkModal.close();
+            },
+            
+            // 绑定事件
+            bindEvents: () => {
+                // 表单提交事件
+                document.getElementById('linkModalForm').addEventListener('submit', LinkModal.save);
+                
+                // 关闭按钮事件
+                document.getElementById('closeLinkModal').addEventListener('click', LinkModal.close);
+                document.getElementById('cancelLinkModal').addEventListener('click', LinkModal.close);
+                
+                // 点击模态框外部关闭
+                document.getElementById('linkModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        LinkModal.close();
+                    }
+                });
+                
+                // ESC键关闭模态框
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && document.getElementById('linkModal').classList.contains('active')) {
+                        LinkModal.close();
+                    }
+                });
             }
+        };
 
-
-            // ---------------- 7. 初始化页面（加载数据+渲染） ----------------
-            function init() {
-                loadData();
-                renderCurrentDate();
-                renderPlayerStatus();
-                renderTasks();
-                bindAllEvents();
+        // -------------------------- 应用初始化 --------------------------
+        const App = {
+            init: () => {
+                // 初始化背景管理
+                Background.init();
+                
+                // 初始化任务管理
+                TaskManager.init();
+                
+                // 初始化链接模态框
+                LinkModal.bindEvents();
+                
+                console.log('每日任务应用已初始化完成！');
             }
+        };
 
-            init();
-        })();
+        // 页面加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', App.init);
     </script>
 </body>
 </html>
