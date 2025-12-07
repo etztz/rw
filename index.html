@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="browser-startpage" content="true">
+    <title>每日任务 | 浏览器起始页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+        }
+
+        /* 基础背景容器：支持自定义背景切换，添加平滑过渡 */
+        body {
+            min-height: 100vh;
+            padding: 20px 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 背景遮罩：可调节透明度，保证内容可读性 */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+            transition: background-color 0.5s ease;
+        }
+
+        /* 容器：增加顶部间距，优化居中视觉 */
+        .container {
+            width: 100%;
+            max-width: 850px;
+            margin: 30px 0 50px;
+            position: relative;
+        }
+
+        /* 顶部设置按钮：悬浮固定，不占用主空间 */
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .settings-btn:hover {
+            background: #f7fafc;
+            transform: rotate(15deg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 背景设置面板：默认隐藏，弹出时居中显示 */
+        .bg-settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 600px;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .bg-settings-panel.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .panel-header h3 {
+            font-size: 18px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-panel {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: #718096;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-panel:hover {
+            color: #e53e3e;
+        }
+
+        /* 背景设置内容区：分区块布局 */
+        .settings-section {
+            margin-bottom: 22px;
+        }
+
+        .settings-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        /* 预设背景选择：网格布局，带预览效果 */
+        .preset-bg-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .preset-bg-item {
+            width: 100%;
+            height: 70px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .preset-bg-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .preset-bg-item.selected {
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
+        }
+
+        .preset-bg-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 本地图片上传：自定义按钮样式 */
+        .local-bg-upload {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f7fafc;
+            border: 1px dashed #e2e8f0;
+            border-radius: 8px;
+            color: #4a5568;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        #localBgInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* 透明度调节滑块：美化样式 */
+        .opacity-slider {
+            width: 100%;
+            margin-top: 10px;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #edf2f7;
+            outline: none;
+        }
+
+        .opacity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2b6cb0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .opacity-slider::-webkit-slider-thumb:hover {
+            background: #2c5282;
+        }
+
+        .opacity-value {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #718096;
+            text-align: right;
+        }
+
+        /* 保存设置按钮 */
+        .save-settings {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #2b6cb0, #2c5282);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .save-settings:hover {
+            background: linear-gradient(90deg, #2c5282, #2a4365);
+            transform: translateY(-2px);
+        }
+
+        /* 面板优化：增加卡片立体感，优化阴影 */
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .panel:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+        }
+
+        /* 标题优化：增加图标色彩，提升视觉焦点 */
+        .panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f7fafc;
+            padding-bottom: 12px;
+        }
+
+        .panel-title i {
+            color: #2b6cb0;
+            font-size: 22px;
+        }
+
+        /* 搜索栏样式：优化图标位置，增加呼吸动画 */
+        .task-search {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 18px;
+            transition: color 0.2s ease;
+        }
+
+        .search-input:focus + .search-icon {
+            color: #2b6cb0;
+        }
+
+        /* 用户状态面板：优化色彩，增加数值视觉层次 */
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 16px 10px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            background-color: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        .status-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+            text-transform: capitalize;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2b6cb0;
+            transition: color 0.2s ease;
+        }
+
+        .status-item:hover .status-value {
+            color: #2c5282;
+        }
+
+        /* 经验条：优化渐变，增加动态感 */
+        .exp-bar-container {
+            width: 100%;
+            height: 12px;
+            background-color: #edf2f7;
+            border-radius: 6px;
+            margin-top: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .exp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169, #2f855a);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background-size: 200% auto;
+            animation: expBarShine 3s infinite;
+        }
+
+        @keyframes expBarShine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 任务列表：优化间距，增加内容呼吸感 */
+        .task-item {
+            display: flex;
+            flex-direction: column;
+            padding: 18px;
+            border-bottom: 1px solid #f7fafc;
+            transition: background-color 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            background: #fdfdfe;
+        }
+
+        .task-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .task-item:hover {
+            background-color: #f7fafc;
+        }
+
+        /* 任务头部：优化按钮排列，增加间距 */
+        .task-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        /* 复选框美化：增大尺寸，优化选中效果 */
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #48bb78;
+            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox:checked {
+            box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+        }
+
+        .task-title {
+            font-size: 17px;
+            color: #2d3748;
+            transition: all 0.3s ease;
+            word-break: break-all;
+        }
+
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #a0aec0;
+            font-weight: 400;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 任务元数据：优化色彩，增加图标 */
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .task-plan {
+            color: #4a5568;
+            background-color: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: capitalize;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-points {
+            color: #dd6b20;
+            font-weight: 500;
+            background-color: #fffaf0;
+            padding: 4px 12px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 任务扩展区：优化边框，增加hover效果 */
+        .task-extension {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .ext-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ext-label {
+            font-size: 13px;
+            color: #718096;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ext-content {
+            font-size: 14px;
+            color: #2d3748;
+            padding: 8px 12px;
+            background-color: #f7fafc;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            word-break: break-all;
+        }
+
+        .ext-content:hover {
+            border-color: #e2e8f0;
+            background-color: #edf2f7;
+        }
+
+        .ext-content.link {
+            color: #2b6cb0;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        /* 编辑输入框：优化边框和圆角 */
+        .ext-edit-note {
+            width: 100%;
+            min-height: 70px;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .ext-edit-link {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        .ext-edit-note:focus, .ext-edit-link:focus {
+            outline: none;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        /* 编辑操作按钮组：优化间距 */
+        .ext-edit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        /* 按钮统一优化：增加圆角，优化渐变 */
+        .btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-complete {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: linear-gradient(90deg, #38a169, #2f855a);
+        }
+
+        .btn-cancel-complete {
+            background: linear-gradient(90deg, #f6ad55, #ed8936);
+            color: white;
+        }
+
+        .btn-cancel-complete:hover {
+            background: linear-gradient(90deg, #ed8936, #dd6b20);
+        }
+
+        .btn-delete {
+            background: linear-gradient(90deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: linear-gradient(90deg, #e53e3e, #c53030);
+        }
+
+        .btn-save {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(90deg, #38a169, #2f855a);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(90deg, #a0aec0, #718096);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: linear-gradient(90deg, #718096, #4a5568);
+        }
+
+        /* 添加任务表单：优化网格间距，提升移动端体验 */
+        .add-task-form {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px 120px;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2b6cb0;
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-add {
+            background: linear-gradient(90deg, #2b6cb0, #2c5282);
+            color: white;
+            padding: 12px;
+        }
+
+        .btn-add:hover {
+            background: linear-gradient(90deg, #2c5282, #2a4365);
+            transform: translateY(-2px);
+        }
+
+        /* 日期提示：优化背景，增加图标 */
+        .date-tip {
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 20px;
+            padding: 12px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .date-tip i {
+            color: #2b6cb0;
+        }
+
+        /* 响应式优化：更精细的断点适配 */
+        @media (max-width: 768px) {
+            .add-task-form {
+                grid-template-columns: 1fr;
+            }
+
+            .status-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .task-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .task-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .task-meta {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .preset-bg-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .bg-settings-panel {
+                padding: 20px 16px;
+                border-radius: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin-top: 20px;
+                padding: 0 10px;
+            }
+
+            .panel {
+                padding: 20px 16px;
+            }
+
+            .status-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+
+            .preset-bg-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 背景遮罩层（用于调节透明度） -->
+    <div class="bg-overlay"></div>
+
+    <!-- 顶部设置按钮 -->
+    <button class="settings-btn" id="settingsBtn">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- 背景设置面板 -->
+    <div class="bg-settings-panel" id="bgSettingsPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-image"></i> 背景设置</h3>
+            <button class="close-panel" id="closePanel">&times;</button>
+        </div>
+
+        <!-- 预设背景选择 -->
+        <div class="settings-section">
+            <label>1. 选择预设背景</label>
+            <div class="preset-bg-list" id="presetBgList">
+                <div class="preset-bg-item selected" data-bg="https://picsum.photos/id/1068/1920/1080">
+                    <img src="https://picsum.photos/id/1068/300/200" alt="预设背景1">
+                </div>
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1035/1920/1080">
+                    <img src="https://picsum.photos/id/1035/300/200" alt="预设背景2">
+                </div>
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1043/1920/1080">
+                    <img src="https://picsum.photos/id/1043/300/200" alt="预设背景3">
+                </div>
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1059/1920/1080">
+                    <img src="https://picsum.photos/id/1059/300/200" alt="预设背景4">
+                </div>
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1062/1920/1080">
+                    <img src="https://picsum.photos/id/1062/300/200" alt="预设背景5">
+                </div>
+                <div class="preset-bg-item" data-bg="https://picsum.photos/id/1080/1920/1080">
+                    <img src="https://picsum.photos/id/1080/300/200" alt="预设背景6">
+                </div>
+            </div>
+        </div>
+
+        <!-- 本地图片上传 -->
+        <div class="settings-section">
+            <label>2. 上传本地背景（优先级高于预设）</label>
+            <div class="local-bg-upload">
+                <label class="upload-btn">
+                    <i class="fas fa-upload"></i> 选择本地图片
+                    <input type="file" id="localBgInput" accept="image/*">
+                </label>
+                <!-- 本地图片预览（默认隐藏） -->
+                <div id="localBgPreview" style="margin-top:12px; display:none;">
+                    <img src="" alt="本地图片预览" style="max-width:100%; border-radius:8px; max-height:200px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- 背景透明度调节 -->
+        <div class="settings-section">
+            <label>3. 背景透明度（数值越小越透明）</label>
+            <input type="range" class="opacity-slider" id="bgOpacitySlider" min="50" max="100" value="85">
+            <div class="opacity-value" id="opacityValue">当前透明度：85%</div>
+        </div>
+
+        <!-- 保存设置按钮 -->
+        <button class="save-settings" id="saveSettingsBtn">保存设置</button>
+    </div>
+
+    <div class="container">
+        <!-- 日期提示 -->
+        <div class="date-tip" id="currentDate">
+            <i class="fas fa-calendar-alt"></i>
+            <span>2024年5月20日 星期一（任务每日自动刷新，未完成项将保留）</span>
+        </div>
+
+        <!-- 1. 用户状态面板 -->
+        <div class="panel status-panel">
+            <h3 class="panel-title"><i class="fas fa-user-circle"></i> 我的进度</h3>
+            <div class="status-item">
+                <div class="status-label">当前等级</div>
+                <div class="status-value" id="level">1</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">当前经验</div>
+                <div class="status-value" id="currentExp">0</div>
+                <div class="exp-bar-container">
+                    <div class="exp-bar" id="expBar"></div>
+                </div>
+                <div class="status-label" id="expRatio">0/100</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">剩余点数</div>
+                <div class="status-value" id="points">0</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">今日完成</div>
+                <div class="status-value" id="todayCompleted">0</div>
+            </div>
+        </div>
+
+        <!-- 2. 添加任务表单 -->
+        <div class="panel add-task-panel">
+            <h3 class="panel-title"><i class="fas fa-plus-circle"></i> 添加新任务</h3>
+            <form class="add-task-form" id="addTaskForm">
+                <input type="text" class="form-input" id="taskTitle" placeholder="输入任务（如：学习JavaScript 1小时）" required>
+                <input type="number" class="form-input" id="taskPoints" min="1" value="10" placeholder="积分（至少1）" required>
+                <select class="form-input" id="taskPlanId" required>
+                    <option value="1">前端学习</option>
+                    <option value="2">Python学习</option>
+                    <option value="3">日常事务</option>
+                </select>
+                <button type="submit" class="btn btn-add"><i class="fas fa-save"></i> 添加</button>
+            </form>
+        </div>
+
+        <!-- 3. 每日任务列表 -->
+        <div class="panel tasks-container">
+            <h3 class="panel-title"><i class="fas fa-list-alt"></i> 今日任务</h3>
+            <!-- 搜索栏 -->
+            <div class="task-search">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="taskSearch" placeholder="搜索任务（标题/备注）...">
+            </div>
+            <div id="taskList"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------------- 1. 核心数据定义（新增背景设置数据） ----------------
+            let playerData = {
+                level: 1,
+                currentExp: 0,
+                requiredExp: 100,
+                points: 0
+            };
+
+            // 背景设置默认数据（本地存储优先级更高）
+            let bgSettings = {
+                presetBg: "https://picsum.photos/id/1068/1920/1080", // 预设背景URL
+                localBg: "", // 本地背景Base64（为空时使用预设）
+                opacity: 85 // 背景透明度（50-100）
+            };
+
+            // 任务库（保留原有结构）
+            const taskLibrary = {
+                1: [ 
+                    { title: "学习HTML语义化标签", note: "", link: "" },
+                    { title: "练习CSS Flex布局", note: "", link: "" },
+                    { title: "手写一个导航栏组件", note: "", link: "" },
+                    { title: "学习JavaScript事件冒泡", note: "", link: "" },
+                    { title: "用CSS实现卡片hover效果", note: "", link: "" },
+                    { title: "理解CSS盒模型", note: "", link: "" },
+                    { title: "学习Vue基础指令", note: "", link: "" }
+                ],
+                2: [ 
+                    { title: "学习Python列表推导式", note: "", link: "" },
+                    { title: "写一个文件读写脚本", note: "", link: "" },
+                    { title: "理解Python类与对象", note: "", link: "" },
+                    { title: "练习2道LeetCode简单题", note: "", link: "https://leetcode-cn.com" },
+                    { title: "学习Python装饰器", note: "", link: "" },
+                    { title: "用Pandas读取Excel文件", note: "", link: "" },
+                    { title: "实现一个简单计算器", note: "", link: "" }
+                ],
+                3: [ 
+                    { title: "早起晨跑30分钟", note: "建议6:30-7:00", link: "" },
+                    { title: "阅读书籍1小时", note: "", link: "" },
+                    { title: "整理桌面/房间", note: "", link: "" },
+                    { title: "写今日反思日记", note: "", link: "" },
+                    { title: "给家人打电话", note: "", link: "" },
+                    { title: "学习一道新菜品", note: "", link: "https://www.xiachufang.com" },
+                    { title: "冥想15分钟", note: "", link: "" }
+                ]
+            };
+
+            let dailyTasks = [];
+            const STORAGE_KEYS = {
+                player: 'startpage_playerData',
+                tasks: 'startpage_dailyTasks',
+                lastRefreshDate: 'startpage_lastRefreshDate',
+                bgSettings: 'startpage_bgSettings' // 新增背景设置存储键
+            };
+
+
+            // ---------------- 2. 工具函数（新增背景相关工具） ----------------
+            // 获取当前日期
+            function getCurrentDate() {
+                const date = new Date();
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            }
+
+            // 格式化日期显示
+            function formatDateForDisplay(dateStr) {
+                const date = new Date(dateStr);
+                const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+                return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekDays[date.getDay()]}`;
+            }
+
+            // 加载所有本地数据（含背景设置）
+            function loadData() {
+                // 加载用户进度
+                const savedPlayer = localStorage.getItem(STORAGE_KEYS.player);
+                if (savedPlayer) playerData = JSON.parse(savedPlayer);
+
+                // 加载背景设置（优先级：本地存储 > 默认）
+                const savedBgSettings = localStorage.getItem(STORAGE_KEYS.bgSettings);
+                if (savedBgSettings) bgSettings = JSON.parse(savedBgSettings);
+
+                // 加载任务数据
+                const savedTasks = localStorage.getItem(STORAGE_KEYS.tasks);
+                const lastRefreshDate = localStorage.getItem(STORAGE_KEYS.lastRefreshDate);
+                const today = getCurrentDate();
+
+                if (!savedTasks || !lastRefreshDate || lastRefreshDate !== today) {
+                    const oldTasks = savedTasks ? JSON.parse(savedTasks).map(task => ({
+                        note: task.note || "",
+                        link: task.link || "",
+                        ...task
+                    })) : [];
+                    dailyTasks = generateDailyTasks(oldTasks);
+                    localStorage.setItem(STORAGE_KEYS.lastRefreshDate, today);
+                } else {
+                    dailyTasks = JSON.parse(savedTasks).map(task => ({
+                        note: task.note || "",
+                        link: task.link || "",
+                        ...task
+                    }));
+                }
+
+                // 加载背景设置到界面
+                applyBgSettings();
+            }
+
+            // 保存所有数据（含背景设置）
+            function saveData() {
+                localStorage.setItem(STORAGE_KEYS.player, JSON.stringify(playerData));
+                localStorage.setItem(STORAGE_KEYS.tasks, JSON.stringify(dailyTasks));
+                localStorage.setItem(STORAGE_KEYS.bgSettings, JSON.stringify(bgSettings));
+            }
+
+            // 应用背景设置（设置body背景和遮罩透明度）
+            function applyBgSettings() {
+                const body = document.body;
+                const bgOverlay = document.querySelector('.bg-overlay');
+                
+                // 设置背景图（本地图片优先）
+                const bgUrl = bgSettings.localBg || bgSettings.presetBg;
+                body.style.background = `url('${bgUrl}') center/cover no-repeat fixed`;
+                
+                // 设置遮罩透明度
+                const opacity = bgSettings.opacity / 100;
+                bgOverlay.style.backgroundColor = `rgba(255, 255, 255, ${opacity})`;
+                
+                // 更新设置面板状态（预设选中、透明度滑块、本地预览）
+                updateBgSettingsPanel();
+            }
+
+            // 更新背景设置面板UI
+            function updateBgSettingsPanel() {
+                // 选中当前预设背景
+                document.querySelectorAll('.preset-bg-item').forEach(item => {
+                    item.classList.remove('selected');
+                    if (item.dataset.bg === bgSettings.presetBg) {
+                        item.classList.add('selected');
+                    }
+                });
+
+                // 更新透明度滑块和数值
+                const opacitySlider = document.getElementById('bgOpacitySlider');
+                const opacityValue = document.getElementById('opacityValue');
+                opacitySlider.value = bgSettings.opacity;
+                opacityValue.textContent = `当前透明度：${bgSettings.opacity}%`;
+
+                // 显示本地图片预览（若有）
+                const localBgPreview = document.getElementById('localBgPreview');
+                const localBgImg = localBgPreview.querySelector('img');
+                if (bgSettings.localBg) {
+                    localBgImg.src = bgSettings.localBg;
+                    localBgPreview.style.display = 'block';
+                } else {
+                    localBgPreview.style.display = 'none';
+                }
+            }
+
+            // 生成唯一任务ID
+            function generateUniqueId() {
+                return Date.now() + Math.floor(Math.random() * 1000);
+            }
+
+
+            // ---------------- 3. 任务生成逻辑（保留原有） ----------------
+            function generateDailyTasks(yesterdayTasks = []) {
+                const unfinishedTasks = yesterdayTasks
+                    .filter(task => !task.completed)
+                    .map(task => ({
+                        note: task.note || "",
+                        link: task.link || "",
+                        id: generateUniqueId(),
+                        ...task
+                    }));
+
+                const newTasks = [];
+                Object.keys(taskLibrary).forEach(planId => {
+                    const planTasks = taskLibrary[planId];
+                    const taskCount = Math.floor(Math.random() * 2) + 1;
+                    const shuffled = [...planTasks].sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, taskCount);
+
+                    selected.forEach(task => {
+                        newTasks.push({
+                            id: generateUniqueId(),
+                            title: task.title,
+                            note: task.note || "",
+                            link: task.link || "",
+                            points: Math.floor(Math.random() * 10) + 10,
+                            completed: false,
+                            planId: parseInt(planId)
+                        });
+                    });
+                });
+
+                return [...unfinishedTasks, ...newTasks];
+            }
+
+
+            // ---------------- 4. 界面渲染函数（保留原有，优化视觉反馈） ----------------
+            function renderCurrentDate() {
+                const today = getCurrentDate();
+                document.getElementById('currentDate').innerHTML = `
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>${formatDateForDisplay(today)}（任务每日自动刷新，未完成项将保留）</span>
+                `;
+            }
+
+            function renderPlayerStatus() {
+                const todayCompleted = dailyTasks.filter(task => task.completed).length;
+
+                document.getElementById('level').textContent = playerData.level;
+                document.getElementById('currentExp').textContent = playerData.currentExp;
+                document.getElementById('points').textContent = playerData.points;
+                document.getElementById('todayCompleted').textContent = todayCompleted;
+
+                const expRatio = (playerData.currentExp / playerData.requiredExp) * 100;
+                document.getElementById('expBar').style.width = `${Math.min(expRatio, 100)}%`;
+                document.getElementById('expRatio').textContent = `${playerData.currentExp}/${playerData.requiredExp}`;
+            }
+
+            function getFilteredTasks(keyword) {
+                if (!keyword.trim()) return dailyTasks;
+                const lowerKeyword = keyword.toLowerCase();
+                return dailyTasks.filter(task => 
+                    task.title.toLowerCase().includes(lowerKeyword) || 
+                    task.note.toLowerCase().includes(lowerKeyword)
+                );
+            }
+
+            function renderTasks(keyword = "") {
+                const filteredTasks = getFilteredTasks(keyword);
+                const taskListEl = document.getElementById('taskList');
+                taskListEl.innerHTML = '';
+
+                if (filteredTasks.length === 0) {
+                    taskListEl.innerHTML = `
+                        <div style="text-align:center; padding:30px; color:#718096; background:#f7fafc; border-radius:12px; border:1px solid #f0f0f0;">
+                            <i class="fas fa-search" style="font-size:24px; margin-bottom:12px; color:#a0aec0;"></i>
+                            <p>未找到匹配任务，请尝试其他关键词~</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                filteredTasks.forEach(task => {
+                    const planName = task.planId === 1 ? '前端学习' : task.planId === 2 ? 'Python学习' : '日常事务';
+                    const noteContent = task.note.trim() || '点击添加备注';
+                    const linkContent = task.link.trim() || '点击添加链接';
+                    const actionBtn = task.completed 
+                        ? `<button class="btn btn-cancel-complete" data-id="${task.id}"><i class="fas fa-undo"></i> 取消完成</button>`
+                        : `<button class="btn btn-complete" data-id="${task.id}"><i class="fas fa-check"></i> 完成</button>`;
+
+                    const taskEl = document.createElement('div');
+                    taskEl.className = 'task-item';
+                    taskEl.dataset.id = task.id;
+                    taskEl.innerHTML = `
+                        <div class="task-header">
+                            <div class="task-info">
+                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} data-id="${task.id}">
+                                <span class="task-title ${task.completed ? 'completed' : ''}">${task.title}</span>
+                            </div>
+                            <div class="task-actions">
+                                ${actionBtn}
+                                <button class="btn btn-delete" data-id="${task.id}"><i class="fas fa-trash"></i> 删除</button>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <span class="task-plan"><i class="fas fa-tags"></i> ${planName}</span>
+                            <span class="task-points"><i class="fas fa-star"></i> +${task.points} 分</span>
+                        </div>
+                        <div class="task-extension">
+                            <div class="ext-item">
+                                <div class="ext-label"><i class="fas fa-sticky-note"></i> 备注</div>
+                                <div class="ext-content note" data-type="note" data-id="${task.id}">${noteContent}</div>
+                            </div>
+                            <div class="ext-item">
+                                <div class="ext-label"><i class="fas fa-link"></i> 关联链接</div>
+                                <div class="ext-content link ${!task.link.trim() ? '' : 'link-active'}" data-type="link" data-id="${task.id}" 
+                                    ${task.link.trim() ? `onclick="window.open('${task.link}', '_blank')"` : ''}>
+                                    ${linkContent}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    taskListEl.appendChild(taskEl);
+                });
+
+                bindAllEvents();
+            }
+
+
+            // ---------------- 5. 事件绑定（新增背景设置相关事件） ----------------
+            function bindAllEvents() {
+                // 1. 任务基础交互（保留原有）
+                document.querySelectorAll('.task-checkbox, .btn-complete, .btn-cancel-complete').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const taskId = parseInt(e.target.dataset.id || e.target.parentElement.dataset.id);
+                        toggleTaskComplete(taskId);
+                    });
+                });
+
+                document.querySelectorAll('.btn-delete').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        const taskId = parseInt(e.target.dataset.id || e.target.parentElement.dataset.id);
+                        if (confirm('确定要删除这个任务吗？删除后不可恢复~')) {
+                            deleteTask(taskId);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.ext-content').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        if (el.classList.contains('link') && el.classList.contains('link-active')) return;
+                        
+                        const taskId = parseInt(el.dataset.id);
+                        const type = el.dataset.type;
+                        const task = dailyTasks.find(t => t.id === taskId);
+                        if (!task) return;
+
+                        const inputHtml = type === 'note' 
+                            ? `<textarea class="ext-edit-note" data-id="${taskId}" data-type="note">${task.note || ''}</textarea>`
+                            : `<input type="url" class="ext-edit-link" data-id="${taskId}" data-type="link" placeholder="输入链接（http://开头）" value="${task.link || ''}">`;
+                        
+                        el.innerHTML = `
+                            ${inputHtml}
+                            <div class="ext-edit-actions">
+                                <button class="btn btn-save" data-id="${taskId}" data-type="${type}"><i class="fas fa-save"></i> 保存</button>
+                                <button class="btn btn-cancel" data-id="${taskId}" data-type="${type}"><i class="fas fa-times"></i> 取消</button>
+                            </div>
+                        `;
+
+                        const inputEl = el.querySelector('.ext-edit-note, .ext-edit-link');
+                        if (inputEl) inputEl.focus();
+                        e.stopPropagation();
+                    });
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('btn-save')) {
+                        const taskId = parseInt(e.target.dataset.id);
+                        const type = e.target.dataset.type;
+                        const taskEl = document.querySelector(`.task-item[data-id="${taskId}"]`);
+                        const inputEl = taskEl.querySelector(`.ext-edit-${type}`);
+                        const contentEl = taskEl.querySelector(`.ext-content[data-type="${type}"]`);
+                        const task = dailyTasks.find(t => t.id === taskId);
+                        if (!task || !inputEl || !contentEl) return;
+
+                        task[type] = inputEl.value.trim();
+                        const content = task[type] || (type === 'note' ? '点击添加备注' : '点击添加链接');
+                        contentEl.textContent = content;
+
+                        if (type === 'link') {
+                            if (task.link.trim()) {
+                                contentEl.classList.add('link-active');
+                                contentEl.setAttribute('onclick', `window.open('${task.link}', '_blank')`);
+                            } else {
+                                contentEl.classList.remove('link-active');
+                                contentEl.removeAttribute('onclick');
+                            }
+                        }
+
+                        saveData();
+                        renderTasks(document.getElementById('taskSearch').value);
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('btn-cancel')) {
+                        renderTasks(document.getElementById('taskSearch').value);
+                    }
+                });
+
+                document.getElementById('taskSearch').addEventListener('input', (e) => {
+                    renderTasks(e.target.value);
+                });
+
+                // 2. 背景设置面板交互（新增）
+                // 打开设置面板
+                document.getElementById('settingsBtn').addEventListener('click', () => {
+                    document.getElementById('bgSettingsPanel').classList.add('active');
+                });
+
+                // 关闭设置面板
+                document.getElementById('closePanel').addEventListener('click', () => {
+                    document.getElementById('bgSettingsPanel').classList.remove('active');
+                });
+
+                // 点击面板外部关闭
+                document.addEventListener('click', (e) => {
+                    const panel = document.getElementById('bgSettingsPanel');
+                    if (!panel.contains(e.target) && e.target !== document.getElementById('settingsBtn')) {
+                        panel.classList.remove('active');
+                    }
+                });
+
+                // 选择预设背景
+                document.querySelectorAll('.preset-bg-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        document.querySelectorAll('.preset-bg-item').forEach(i => i.classList.remove('selected'));
+                        item.classList.add('selected');
+                        bgSettings.presetBg = item.dataset.bg;
+                        // 选择预设时清空本地背景（避免优先级冲突）
+                        bgSettings.localBg = "";
+                        document.getElementById('localBgPreview').style.display = 'none';
+                    });
+                });
+
+                // 上传本地背景
+                document.getElementById('localBgInput').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    // 验证文件类型
+                    if (!file.type.startsWith('image/')) {
+                        alert('请选择图片文件（jpg、png等）！');
+                        return;
+                    }
+
+                    // 读取图片为Base64
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        bgSettings.localBg = event.target.result;
+                        // 显示预览
+                        const localBgPreview = document.getElementById('localBgPreview');
+                        const localBgImg = localBgPreview.querySelector('img');
+                        localBgImg.src = bgSettings.localBg;
+                        localBgPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // 调节背景透明度
+                document.getElementById('bgOpacitySlider').addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    bgSettings.opacity = value;
+                    document.getElementById('opacityValue').textContent = `当前透明度：${value}%`;
+                    // 实时预览透明度（未保存也能看效果）
+                    const bgOverlay = document.querySelector('.bg-overlay');
+                    bgOverlay.style.backgroundColor = `rgba(255, 255, 255, ${value / 100})`;
+                });
+
+                // 保存背景设置
+                document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+                    saveData();
+                    applyBgSettings();
+                    document.getElementById('bgSettingsPanel').classList.remove('active');
+                    alert('背景设置已保存！下次打开将自动应用~');
+                });
+
+                // 3. 添加任务表单（保留原有）
+                document.getElementById('addTaskForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const title = document.getElementById('taskTitle').value;
+                    const points = document.getElementById('taskPoints').value;
+                    const planId = document.getElementById('taskPlanId').value;
+
+                    if (!title.trim()) {
+                        alert('请输入任务标题哦~');
+                        return;
+                    }
+
+                    addNewTask(title, points, planId);
+                    e.target.reset();
+                    document.getElementById('taskTitle').focus();
+                });
+            }
+
+
+            // ---------------- 6. 任务交互逻辑（保留原有） ----------------
+            function toggleTaskComplete(taskId) {
+                const taskIndex = dailyTasks.findIndex(task => task.id === taskId);
+                if (taskIndex === -1) return;
+
+                const task = dailyTasks[taskIndex];
+                const isNowCompleted = !task.completed;
+
+                task.completed = isNowCompleted;
+                dailyTasks[taskIndex] = task;
+
+                const pointsChange = isNowCompleted ? task.points : -task.points;
+                const expChange = isNowCompleted ? task.points * 2 : -task.points * 2;
+
+                playerData.points += pointsChange;
+                playerData.currentExp += expChange;
+
+                playerData.points = Math.max(playerData.points, 0);
+                playerData.currentExp = Math.max(playerData.currentExp, 0);
+
+                checkLevelUp();
+                saveData();
+                renderTasks(document.getElementById('taskSearch').value);
+                renderPlayerStatus();
+
+                const tip = isNowCompleted 
+                    ? `🎉 任务完成！获得 ${task.points} 积分 + ${task.points * 2} 经验！`
+                    : `🔄 已取消任务完成状态，扣除 ${Math.abs(pointsChange)} 积分 + ${Math.abs(expChange)} 经验`;
+                alert(tip);
+            }
+
+            function checkLevelUp() {
+                while (playerData.currentExp >= playerData.requiredExp) {
+                    playerData.level += 1;
+                    playerData.currentExp -= playerData.requiredExp;
+                    playerData.requiredExp = Math.floor(playerData.requiredExp * 1.5);
+                    playerData.points += 5;
+                    alert(`🎊 恭喜升级到 Lv.${playerData.level}！获得 5 积分奖励！`);
+                }
+            }
+
+            function deleteTask(taskId) {
+                const taskIndex = dailyTasks.findIndex(task => task.id === taskId);
+                if (taskIndex === -1) return;
+
+                const task = dailyTasks[taskIndex];
+                if (task.completed) {
+                    playerData.points -= task.points;
+                    playerData.currentExp -= task.points * 2;
+                    playerData.points = Math.max(playerData.points, 0);
+                    playerData.currentExp = Math.max(playerData.currentExp, 0);
+                }
+
+                dailyTasks.splice(taskIndex, 1);
+                saveData();
+                renderTasks(document.getElementById('taskSearch').value);
+                renderPlayerStatus();
+            }
+
+            function addNewTask(title, points, planId) {
+                const newTask = {
+                    id: generateUniqueId(),
+                    title: title.trim(),
+                    note: "",
+                    link: "",
+                    points: parseInt(points),
+                    completed: false,
+                    planId: parseInt(planId)
+                };
+
+                dailyTasks.unshift(newTask);
+                saveData();
+                renderTasks(document.getElementById('taskSearch').value);
+            }
+
+
+            // ---------------- 7. 初始化页面（加载数据+渲染） ----------------
+            function init() {
+                loadData();
+                renderCurrentDate();
+                renderPlayerStatus();
+                renderTasks();
+                bindAllEvents();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
